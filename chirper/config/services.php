@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'spoonacular' => [
+        'api_key' => env('SPOONACULAR_API_KEY'),
+    ],
+    'translator' => [
+        'api_key' => env('TRANSLATOR_API_KEY'),
+        'endpoint' => env('TRANSLATOR_ENDPOINT', 'https://api.cognitive.microsofttranslator.com/'),
+    ],
 ];
