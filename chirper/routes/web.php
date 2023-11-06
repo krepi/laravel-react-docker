@@ -34,6 +34,15 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+
+
+//Route::inertia('/recipes', 'Recipe/Index')->name('recipes.index');
+
+
+//Route::get('/dashboard', [RecipeController::class, 'index'])
+//    ->middleware(['auth', 'verified'])
+//    ->name('dashboard');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -41,6 +50,9 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('recipes',RecipeController::class)
     ->only(['index','create','destroy', 'store']);
+
+    Route::get('/recipe/{id}', [RecipeController::class, 'showRecipeFromApi'])->name('recipe.showRecipeFromApi');
+
 });
 
 require __DIR__.'/auth.php';

@@ -27,9 +27,6 @@ export default function Authenticated({ user, header, children }) {
                                 <NavLink href={route('recipes.index')} active={route().current('recipes.index')}>
                                     Recipes
                                 </NavLink>
-                                <NavLink href={route('recipes.create')} active={route().current('recipes.create')}>
-                                    Create Recipe
-                                </NavLink>
                             </div>
                         </div>
 
@@ -101,12 +98,15 @@ export default function Authenticated({ user, header, children }) {
                         <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
                             Dashboard
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('recipes.index')} active={route().current('recipes.index')}>
+                            Recipes
+                        </ResponsiveNavLink>
                     </div>
 
                     <div className="pt-4 pb-1 border-t border-gray-200">
                         <div className="px-4">
                             <div className="font-medium text-base text-gray-800">{user.name}</div>
-                            <div className="font-medium text-sm text-gray-500">{user.email}</div>
+                            {/*<div className="font-medium text-sm text-gray-500">{user.email}</div>*/}
                         </div>
 
                         <div className="mt-3 space-y-1">

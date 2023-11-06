@@ -3,35 +3,89 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Inertia\Response;
 
 class TranslationService
 {
     private $apiKey;
     private $endpoint;
 
-    public function __construct(string $apiKey, string $endpoint)
+    public function __construct()
     {
-        $this->apiKey = $apiKey;
-        $this->endpoint = $endpoint;
+        $this->apiKey = config('services.translator.api_key');
+        $this->endpoint = config('services.translator.endpoint');
     }
 
-    public function translate(array $texts, string $toLanguage): array
+
+    public function translate($texts, $toLanguage = 'pl') :array
     {
+        // Prepare the text for translation
         $body = array_map(function ($text) {
             return ['Text' => $text];
         }, $texts);
 
-        $response = Http::withHeaders([
+        // Make the POST request to the Microsoft Translator API
+//        $translator_response = Http::withHeaders([
+//            'Ocp-Apim-Subscription-Key' => $this->apiKey,
+//            'Content-Type' => 'application/json',
+//            'Ocp-Apim-Subscription-Region' => 'global',
+//        ])->post("{$this->endpoint}/translate?api-version=3.0&to={$to}", $body);
+
+        $translator_response = $this->makeRequest($body,$toLanguage);
+
+        if ($translator_response->successful()) {
+            $translated_texts = array_map(function ($translationResult) {
+                return $translationResult['translations'][0]['text'] ?? 'Translation unavailable';
+            }, $translator_response->json());
+
+            return $translated_texts;
+        } else {
+            // Log the error response for debugging
+            Log::error('TranslationService failed', [
+                'response' => $translator_response->body()
+            ]);
+
+            // Throw a more specific exception, or handle the error appropriately
+            throw new \Exception('Failed to translate: ' . $translator_response->body());
+        }
+    }
+
+    public function translateOne(string $text, string $toLanguage = 'pl'): string
+    {
+        // Prepare the text for translation by wrapping it in an array
+        $body = [['Text' => $text]];
+
+
+
+        $response = $this->makeRequest($body,$toLanguage);
+
+        // Check for success and extract translated text
+        if ($response->successful()) {
+            $translationResults = $response->json();
+            // Return the first translation result
+            return $translationResults[0]['translations'][0]['text'] ?? 'Translation unavailable';
+        } else {
+            // Log the error response for debugging
+            Log::error('TranslationService failed', [
+                'response' => $response->body()
+            ]);
+            throw new \Exception('Failed to translate: ' . $response->body());
+        }
+    }
+
+
+
+    public function makeRequest($body,$toLanguage): \GuzzleHttp\Promise\PromiseInterface|\Illuminate\Http\Client\Response
+    {
+     $response = Http::withHeaders([
             'Ocp-Apim-Subscription-Key' => $this->apiKey,
             'Content-Type' => 'application/json',
             'Ocp-Apim-Subscription-Region' => 'global',
         ])->post("{$this->endpoint}/translate?api-version=3.0&to={$toLanguage}", $body);
-
-        if ($response->successful()) {
-            return array_column(array_column($response->json(), 'translations'), 'text');
-        }
-
-        throw new \Exception('Nie udało się przetłumaczyć tekstu.');
-    }
+     return $response;
+     }
 }
+
+
 
