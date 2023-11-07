@@ -62,8 +62,39 @@ class RecipeController extends Controller
 //    }
     public function index(): Response
     {
+//        $cacheKey = 'apiRecipes';
+//        $apiRecipes = cache()->remember($cacheKey, now()->addMinutes(30), function () {
+//            $recipesFromApi = $this->recipeApiService->fetchRecipes();
+//            $titles = array_column($recipesFromApi['recipes'], 'title');
+//            $translatedTitles = $this->translationService->translate($titles);
+//
+//            array_walk($recipesFromApi['recipes'], function (&$recipe, $index) use ($translatedTitles) {
+//                $recipe['title'] = $translatedTitles[$index] ?? $recipe['title'];
+//            });
+//
+//            return $recipesFromApi;
+//        });
+//
+//        return Inertia::render('Recipe/Index', [
+//            'recipes' => Recipe::all(),
+//            'apiRecipes' => $apiRecipes
+//        ]);
+        return Inertia::render('Recipe/Index', [
+            'recipes' => $this->getLocalRecipes(),
+            'apiRecipes' => $this->getApiRecipes()
+        ]);
+
+    }
+
+    protected function getLocalRecipes()
+    {
+        return Recipe::all();
+    }
+
+    protected function getApiRecipes()
+    {
         $cacheKey = 'apiRecipes';
-        $apiRecipes = cache()->remember($cacheKey, now()->addMinutes(30), function () {
+        return cache()->remember($cacheKey, now()->addMinutes(30), function () {
             $recipesFromApi = $this->recipeApiService->fetchRecipes();
             $titles = array_column($recipesFromApi['recipes'], 'title');
             $translatedTitles = $this->translationService->translate($titles);
@@ -72,15 +103,9 @@ class RecipeController extends Controller
                 $recipe['title'] = $translatedTitles[$index] ?? $recipe['title'];
             });
 
-            return $recipesFromApi;
+            return $recipesFromApi['recipes'];
         });
-
-        return Inertia::render('Recipe/Index', [
-            'recipes' => Recipe::all(),
-            'apiRecipes' => $apiRecipes
-        ]);
     }
-
 
     /**
      * Show the form for creating a new resource.

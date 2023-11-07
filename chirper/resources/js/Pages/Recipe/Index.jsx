@@ -59,7 +59,7 @@ export default function Index({auth, recipes, apiRecipes}) {
                                 gap: '5rem',
                             }}>
                                 {apiRecipes &&
-                                    apiRecipes.recipes.map(apiRecipe => (
+                                    apiRecipes.map(apiRecipe => (
                                         <SplideSlide key={apiRecipe.id} className='mb-4 '>
                                             <Card>
                                                 <Link href={`/recipe/${apiRecipe.id}`}>
