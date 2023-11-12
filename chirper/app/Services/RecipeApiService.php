@@ -41,5 +41,23 @@ class RecipeApiService
     }
 
 
+    public function searchRecipes(string $query): array
+    {
+        $response = Http::get("https://api.spoonacular.com/recipes/complexSearch", [
+            'apiKey' => $this->apiKey,
+            'query' => $query,
+            'number' => 5
+            // Dodaj dodatkowe parametry wyszukiwania, jeśli potrzebujesz
+        ]);
+
+        if ($response->successful()) {
+            return $response->json()['results'];
+        }
+
+        throw new \Exception('Nie udało się pobrać danych z API Spoonacular.' .  $response->body());
+    }
+
+
+
 }
 

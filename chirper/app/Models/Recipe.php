@@ -10,10 +10,16 @@ class Recipe extends Model
 {
     use HasFactory;
 
-   protected $fillable = [
-       'title',
-       'body'
-   ];
+    protected $fillable = [
+        'title',
+        'ingredients',
+        'instructions',
+        'ready_in_minutes',
+        'servings',
+        'image',
+        'user_id',
+        'source', // Dodaj 'source' do listy fillable
+    ];
 
 
 

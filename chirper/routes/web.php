@@ -52,6 +52,13 @@ Route::middleware('auth')->group(function () {
     ->only(['index','create','destroy', 'store']);
 
     Route::get('/recipe/{id}', [RecipeController::class, 'showRecipeFromApi'])->name('recipe.showRecipeFromApi');
+//    Route::post('/searchedRecipes',  [RecipeController::class, 'searchedRecipes']);
+
+    // Trasa dla wyszukiwania przepisów
+    Route::post('/search', [RecipeController::class, 'handleSearch'])->name('recipes.handleSearch');
+
+// Trasa wyświetlająca wyniki wyszukiwania
+    Route::get('/search-results/{cacheKey}', [RecipeController::class, 'showSearchedRecipes'])->name('searched.recipes');
 
 });
 
