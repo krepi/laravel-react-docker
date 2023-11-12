@@ -92,8 +92,8 @@ class RecipeController extends Controller
 
         if ($request->hasFile('image')) {
             $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images'), $imageName);
-            $recipe->image = '/images/' . $imageName;
+            $request->image->move(public_path('images/recipes'), $imageName);
+            $recipe->image = '/images/recipes/' . $imageName;
         }
 
         $recipe->save();
