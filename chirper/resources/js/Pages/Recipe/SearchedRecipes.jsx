@@ -17,7 +17,7 @@ const SearchedRecipes = ({auth,searchResults}) => {
 
                     {searchResults.map((result, index) => (
                         <Card key={result.id}>
-                            <Link to={'/recipe/' + result.id}>
+                            <Link href={`/recipe/${result.id}`}>
                                 <img src={result.image} alt=""/>
                                 <h4>{result.title}</h4>
                             </Link>

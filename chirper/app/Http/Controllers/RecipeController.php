@@ -144,6 +144,20 @@ class RecipeController extends Controller
         return $recipe;
     }
 
+//    protected function translateNestedFields($item, $fieldsToTranslate)
+//    {
+//        foreach ($fieldsToTranslate as $nestedField => $nestedMethod) {
+//            if (isset($item[$nestedField])) {
+//                if ($nestedMethod === 'translate') {
+//                    $item[$nestedField] = $this->translationService->translate($item[$nestedField]);
+//                } elseif ($nestedMethod === 'translateOne') {
+//                    $item[$nestedField] = $this->translationService->translateOne($item[$nestedField]);
+//                }
+//            }
+//        }
+//        return $item;
+//    }
+
     protected function translateNestedFields($item, $fieldsToTranslate)
     {
         foreach ($fieldsToTranslate as $nestedField => $nestedMethod) {
@@ -152,13 +166,18 @@ class RecipeController extends Controller
                     $item[$nestedField] = $this->translationService->translate($item[$nestedField]);
                 } elseif ($nestedMethod === 'translateOne') {
                     $item[$nestedField] = $this->translationService->translateOne($item[$nestedField]);
+                } elseif (is_array($nestedMethod)) {
+                    // Obsługa jeszcze głębszego poziomu zagnieżdżenia
+                    foreach ($nestedMethod as $deepNestedField => $deepNestedMethod) {
+                        if (isset($item[$nestedField][$deepNestedField])) {
+                            $item[$nestedField][$deepNestedField] = $this->translateNestedFields($item[$nestedField][$deepNestedField], $deepNestedMethod);
+                        }
+                    }
                 }
             }
         }
         return $item;
     }
-
-
     protected function getApiRecipes()
     {
         $cacheKey = 'apiRecipes';
@@ -188,7 +207,12 @@ class RecipeController extends Controller
                 'title' => 'translateOne', // Tłumaczenie pojedynczego pola
                 'instructions' => 'translateOne',
                 'extendedIngredients' => [
-                    'original' => 'translateOne' // Tłumaczenie zagnieżdżonych pól
+                    'originalName' => 'translateOne',
+                    'measures'=>[
+                        'metric'=>[
+                            'unitLong'=>'translateOne'
+                        ]
+                    ]                   // Tłumaczenie zagnieżdżonych pól
                 ]
             ];
             return $this->translateRecipeFields($recipe, $translationMap);

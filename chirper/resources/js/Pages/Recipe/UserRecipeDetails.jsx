@@ -1,33 +1,15 @@
 // import React from 'react';
-import {Head, Link} from "@inertiajs/react";
+import {Head} from "@inertiajs/react";
 import styled from "styled-components";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import DOMPurify from 'dompurify';
 import React, {useState, useEffect} from 'react';
-import IngredientListItem from "@/Components/Recipes/IngredientListItem.jsx";
+import {Link} from "@inertiajs/react";
 
 
 const RecipeApiDetails = ({recipe, auth}) => {
     console.log(recipe)
     const [isLoading, setIsLoading] = useState(true);
-
-    const formatRecipeForSaving = () => {
-        return {
-            title: recipe.title,
-            ingredients: recipe.extendedIngredients.map(ingredient => ({
-                name: ingredient.nameClean,
-                quantity: ingredient.measures.metric.amount,
-                unit: ingredient.measures.metric.unitLong
-            })),
-            instructions: recipe.instructions,
-            ready_in_minutes: recipe.readyInMinutes,
-            servings: recipe.servings,
-            source: 'api'
-        };
-    };
-    const repcia = formatRecipeForSaving();
-    console.log(repcia)
-
 
     useEffect(() => {
         // Symulacja pobierania danych, ustaw isLoading na false, gdy dane są gotowe
@@ -50,16 +32,6 @@ const RecipeApiDetails = ({recipe, auth}) => {
             ) : (
                 <DetailWrapper className='max-w-7xl mx-auto sm:px-6 lg:px-8'>
                     <div>
-                    <Link className=' text-white m-4 bg-green-500 py-2 px-6 rounded'
-                          as='button'
-                          // href={route('recipes.destroy', recipe.id)}
-                          method="delete">Save</Link>
-                    <Link className=' text-white m-4 bg-yellow-500 py-2 px-6 rounded'
-                          as='button'
-                          // href={route('recipes.destroy', recipe.id)}
-                          method="delete">Like</Link>
-                    </div>
-                    <div>
                         <h2>{recipe.title}</h2>
                         <img src={recipe.image} alt={recipe.title}/>
                         <p>porcji: {recipe.servings}</p>
@@ -68,25 +40,16 @@ const RecipeApiDetails = ({recipe, auth}) => {
                     <Info>
                         <p dangerouslySetInnerHTML={{__html: cleanInstructions}}/>
                         <ul>
-                            {/*{recipe.extendedIngredients.map((ingredient, index) => (*/}
-                            {/*    // <li key={ingredient.id + '_' + index}>{ingredient.originalName}  {ingredient.measures.metric.amount} {  ingredient.measures.metric.unitLong === '' ? 'szt': ingredient.measures.metric.unitLong }</li>*/}
-                            {/*    <li key={ingredient.id + '_' + index}>*/}
-                            {/*        {ingredient.originalName.charAt(0).toUpperCase() + ingredient.originalName.slice(1)}*/}
-                            {/*         {ingredient.measures.metric.amount}*/}
-                            {/*        {ingredient.measures.metric.unitLong === ''*/}
-                            {/*            ? 'szt'*/}
-                            {/*            : ingredient.measures.metric.unitLong.toLowerCase()}*/}
-                            {/*    </li>*/}
-
-                            {/*))}*/}
-                            <ul>
-                                {recipe.extendedIngredients.map((ingredient, index) => (
-                                    <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient} />
-                                ))}
-                            </ul>
+                            {recipe.extendedIngredients.map((ingredient, index) => (
+                                <li key={ingredient.id + '_' + index}>{ingredient.original}</li>
+                            ))}
                         </ul>
                         {/* Wyświetl inne szczegóły przepisu */}
                     </Info>
+                    <Link className=' text-white m-4 bg-red-600 py-2 px-6 rounded'
+                              as='button'
+                              href={route('recipes.destroy', recipe.id)}
+                              method="delete">Delete</Link>
                 </DetailWrapper>)}
         </AuthenticatedLayout>
     );

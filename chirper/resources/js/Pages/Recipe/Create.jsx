@@ -55,25 +55,46 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {Head} from '@inertiajs/react';
 
 export default function Create({auth}) {
+    const unitOptions = ['ml', 'l', 'kg', 'g', 'szt.', 'łyżka', 'łyżeczka', 'opakowanie', 'szklanka'];
+
+    // const [values, setValues] = useState({
+    //     title: '',
+    //     ingredients: [{name: '', quantity: '', unit: ''}],
+    //     instructions: '',
+    //     ready_in_minutes: '',
+    //     servings: '',
+    // });
     const [values, setValues] = useState({
         title: '',
-        ingredients: [{name: '', quantity: ''}],
+        ingredients: [{ name: '', quantity: '', unit: '' }],
         instructions: '',
         ready_in_minutes: '',
         servings: '',
     });
-
     const [image, setImage] = useState(null);
 
+    // const handleChange = (e) => {
+    //     const {name, value} = e.target;
+    //     if (name.startsWith('ingredient')) {
+    //         const index = parseInt(name.split('_')[1], 10);
+    //         const newIngredients = [...values.ingredients];
+    //         newIngredients[index][e.target.dataset.type] = value;
+    //         setValues({...values, ingredients: newIngredients});
+    //     } else {
+    //         setValues({...values, [name]: value});
+    //     }
+    // };
+
+
     const handleChange = (e) => {
-        const {name, value} = e.target;
+        const { name, value, dataset } = e.target;
         if (name.startsWith('ingredient')) {
             const index = parseInt(name.split('_')[1], 10);
             const newIngredients = [...values.ingredients];
-            newIngredients[index][e.target.dataset.type] = value;
-            setValues({...values, ingredients: newIngredients});
+            newIngredients[index][dataset.type] = value;
+            setValues({ ...values, ingredients: newIngredients });
         } else {
-            setValues({...values, [name]: value});
+            setValues({ ...values, [name]: value });
         }
     };
 
@@ -150,7 +171,19 @@ export default function Create({auth}) {
                                         value={ingredient.quantity}
                                         onChange={handleChange}
                                     />
+                                    <label htmlFor={`ingredient_${index}_unit`}>Unit:</label>
+                                    <select
+                                        name={`ingredient_${index}`}
+                                        data-type="unit"
+                                        value={ingredient.unit}
+                                        onChange={handleChange}
+                                    >
+                                        {unitOptions.map((unit) => (
+                                            <option key={unit} value={unit}>{unit}</option>
+                                        ))}
+                                    </select>
                                 </div>
+
                             ))}
                             <div>
                                 <button className=' text-white m-4 bg-green-500 py-2 px-6 rounded' type="button"

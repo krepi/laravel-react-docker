@@ -34,7 +34,7 @@ export default function ApiRecipes({apiRecipes}) {
                                             <p className='text-xl'>
                                                 {apiRecipe.title}
                                             </p>
-                                            <img src={apiRecipe.image} alt=""/>
+                                            <img src={apiRecipe.image || '/images/recipes/placeholder.jpg'} alt=""/>
                                             <Gradient/>
                                         </Link>
                                     </Card>
