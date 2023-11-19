@@ -5,11 +5,12 @@ import styled from "styled-components";
 
 
 export default function UserRecipes({recipes, auth}) {
-    const ingredientsArray = JSON.parse(recipes[4].ingredients);
-    console.log(recipes[4])
-    console.log(ingredientsArray[0].name+ ' ' + ingredientsArray[0].quantity + ingredientsArray[0].unit); // Powinno wyświetlić "kapusta"
-
-
+    // if( recipes){
+    // const ingredientsArray = JSON.parse(recipes[0].ingredients);
+    //
+    // console.log(ingredientsArray[0].name+ ' ' + ingredientsArray[0].quantity + ingredientsArray[0].unit); // Powinno wyświetlić "kapusta"
+    // }
+console.log(recipes)
 
     return (
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">

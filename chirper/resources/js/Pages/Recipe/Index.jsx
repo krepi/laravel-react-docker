@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Head, Link} from '@inertiajs/react';
+import {Head, Link, usePage} from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import NavLink from "@/Components/common/NavLink.jsx";
 import styled from "styled-components";
@@ -10,13 +10,21 @@ import Search from "@/Components/Recipes/Search.jsx";
 import UserRecipes from "@/Components/Recipes/UserRecipes.jsx";
 
 
-export default function Index({auth, recipes, apiRecipes, }) {
-    console.log(apiRecipes);
+export default function Index({auth, recipes, apiRecipes, message }) {
+    // console.log(message);
+    // const { message } = usePage().props;
+
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="Recipes"/>
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    {message && (
+                        <div className="alert alert-info">
+                            {message}
+                        </div>
+                    )}
+
                     <NavLink href={route('recipes.create')} active={route().current('recipes.create')}>
                         Create Recipes
                     </NavLink>

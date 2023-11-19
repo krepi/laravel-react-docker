@@ -5,55 +5,116 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import DOMPurify from 'dompurify';
 import React, {useState, useEffect} from 'react';
 import IngredientListItem from "@/Components/Recipes/IngredientListItem.jsx";
+import {Inertia} from "@inertiajs/inertia";
 
 
-const RecipeApiDetails = ({recipe, auth}) => {
-    console.log(recipe)
-    const [isLoading, setIsLoading] = useState(true);
+const RecipeApiDetails = ({recipe, auth, message}) => {
+    // const [message, setMessage] = useState('');
+    console.log(typeof (recipe.id))
+    // const [isLoading, setIsLoading] = useState(true);
 
     const formatRecipeForSaving = () => {
         return {
             title: recipe.title,
             ingredients: recipe.extendedIngredients.map(ingredient => ({
-                name: ingredient.nameClean,
-                quantity: ingredient.measures.metric.amount,
+                name: ingredient.originalName,
+                quantity: ingredient.measures.metric.amount.toString(), // Konwersja na string
                 unit: ingredient.measures.metric.unitLong
             })),
             instructions: recipe.instructions,
-            ready_in_minutes: recipe.readyInMinutes,
-            servings: recipe.servings,
-            source: 'api'
+            ready_in_minutes: recipe.readyInMinutes.toString(), // Konwersja na string
+            servings: recipe.servings.toString(), // Konwersja na string
+            source: 'spoon',
+            image: recipe.image, // URL obrazu
+            id_from_api:recipe.id
         };
     };
+
     const repcia = formatRecipeForSaving();
-    console.log(repcia)
+    console.log('id from api '+ typeof(repcia.id_from_api))
 
 
-    useEffect(() => {
-        // Symulacja pobierania danych, ustaw isLoading na false, gdy dane są gotowe
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 2000); // Załóżmy, że ładowanie trwa 2 sekundy
+    // const handleSaveRecipe = () => {
+    //     const formattedRecipe = formatRecipeForSaving();
+    //     Inertia.post(route('recipes.store'), formattedRecipe, {
+    //         onSuccess: (response) => {
+    //             setMessage(response.data.message || 'Recipe has been saved successfully.');
+    //         },
+    //         onError: (errors) => {
+    //             setMessage('An error occurred while saving the recipe.');
+    //         }
+    //     });
+    // };
 
-        return () => clearTimeout(timer);
-    }, []);
+    const handleSaveRecipe = () => {
+        const formattedRecipe = formatRecipeForSaving();
+        const formData = new FormData();
+
+        formData.append('title', formattedRecipe.title);
+        formData.append('ingredients', JSON.stringify(formattedRecipe.ingredients));
+        formData.append('instructions', formattedRecipe.instructions);
+        formData.append('ready_in_minutes', formattedRecipe.ready_in_minutes);
+        formData.append('servings', formattedRecipe.servings);
+        formData.append('source', formattedRecipe.source);
+        formData.append('id_from_api', formattedRecipe.id_from_api);
+
+        // Dodaj obraz, jeśli istnieje
+        if (formattedRecipe.image) {
+            formData.append('image', formattedRecipe.image);
+        }
+
+        Inertia.post(route('recipes.store'), formData, {
+            onSuccess: (response) => {
+                setMessage(response.data.message || 'Recipe has been saved successfully.');
+            },
+            onError: (errors) => {
+                setMessage('An error occurred while saving the recipe.');
+            }
+        });
+    };
+
+
+
+
+
+
+
+    // useEffect(() => {
+    //     // Symulacja pobierania danych, ustaw isLoading na false, gdy dane są gotowe
+    //     const timer = setTimeout(() => {
+    //         setIsLoading(false);
+    //     }, 2000); // Załóżmy, że ładowanie trwa 2 sekundy
+    //
+    //     return () => clearTimeout(timer);
+    // }, []);
 
     const cleanInstructions = DOMPurify.sanitize(recipe.instructions);
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="Recipe"/>
-            {isLoading ? (
-                <SpinnerContainer>
+            {/*{isLoading ? (*/}
+            {/*    <SpinnerContainer>*/}
 
-                    <Spinner>Loading...</Spinner>
-                </SpinnerContainer>
-            ) : (
+            {/*        <Spinner>Loading...</Spinner>*/}
+            {/*    </SpinnerContainer>*/}
+            {/*) : (*/}
                 <DetailWrapper className='max-w-7xl mx-auto sm:px-6 lg:px-8'>
                     <div>
-                    <Link className=' text-white m-4 bg-green-500 py-2 px-6 rounded'
-                          as='button'
-                          // href={route('recipes.destroy', recipe.id)}
-                          method="delete">Save</Link>
+                        {message && (
+                            <div className="alert alert-info text-red-600">
+                                {message}
+                            </div>
+                        )}
+
+                    {/*<Link className=' text-white m-4 bg-green-500 py-2 px-6 rounded'*/}
+                    {/*      as='button'*/}
+                    {/*      // href={route('recipes.destroy', recipe.id)}*/}
+                    {/*      method="delete">Save</Link>*/}
+
+                        <button onClick={handleSaveRecipe} className='text-white m-4 bg-green-500 py-2 px-6 rounded'>
+                            Save Recipe to Database
+                        </button>
+                        {/*{message && <p>{message}</p>}*/}
                     <Link className=' text-white m-4 bg-yellow-500 py-2 px-6 rounded'
                           as='button'
                           // href={route('recipes.destroy', recipe.id)}
@@ -87,7 +148,8 @@ const RecipeApiDetails = ({recipe, auth}) => {
                         </ul>
                         {/* Wyświetl inne szczegóły przepisu */}
                     </Info>
-                </DetailWrapper>)}
+                </DetailWrapper>)
+        {/*}*/}
         </AuthenticatedLayout>
     );
 };

@@ -47,10 +47,12 @@ return new class extends Migration
             $table->integer('servings')->nullable(); // Liczba porcji
             $table->string('image')->nullable(); // Ścieżka do obrazu
             $table->enum('source', ['spoon', 'user']); // Źródło przepisu
+            $table->unsignedBigInteger('id_from_api')->nullable(); //  from Api
             $table->unsignedBigInteger('user_id'); // Klucz obcy użytkownika
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users'); // Relacja z tabelą użytkowników
+            $table->unique(['id_from_api', 'user_id']); // Dodaj tę linię
         });
     }
 
