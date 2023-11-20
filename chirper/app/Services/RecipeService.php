@@ -14,27 +14,13 @@ class RecipeService {
         return Recipe::all();
     }
 
-//    public function storeRecipe(Request $request) {
-//        $rules = $this->getValidationRules($request);
-//
-//        $validatedData = $request->validate($rules);
-//
-//        if ($validatedData['source'] === 'spoon' && $this->recipeExists($validatedData)) {
-//            return ['status' => 'exists'];
-//        }
-//
-//        $recipe = $this->createRecipe($validatedData, $request);
-//
-//        Log::info('Recipe saved successfully with ID: ', ['id' => $recipe->id]);
-//        return ['status' => 'success', 'recipe' => $recipe];
-//    }
     public function storeRecipe(Request $request) {
         $rules = $this->getValidationRules($request);
 
         try {
             $validatedData = $request->validate($rules);
             $recipe = $this->createRecipe($validatedData, $request);
-            
+
             return ['status' => 'success', 'recipe' => $recipe, 'message' => 'Przepis został pomyślnie zapisany.'];
 
         } catch (\Illuminate\Validation\ValidationException $e) {

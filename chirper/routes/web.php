@@ -49,10 +49,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('recipes',RecipeController::class)
-    ->only(['index','create','destroy', 'store']);
+    ->only(['index','create','destroy', 'store', 'show']);
 
     Route::get('/recipe/{id}', [RecipeController::class, 'showRecipeFromApi'])->name('recipe.showRecipeFromApi');
-//    Route::post('/searchedRecipes',  [RecipeController::class, 'searchedRecipes']);
+
+
 
     // Trasa dla wyszukiwania przepisów
     Route::post('/search', [RecipeController::class, 'handleSearch'])->name('recipes.handleSearch');

@@ -37,19 +37,19 @@ console.log(recipes)
                             recipes.map(recipe => (
 
                                 <SplideSlide key={recipe.id} className='mb-4 '>
+                                    <Link className=' text-white m-4 bg-red-600 py-2 px-6 rounded'
+                                          key={recipe.id}
+                                          href={route('recipes.show', recipe.id)}
+                                    >
                                     <Card>
                                         <p className='text-xxl'> {recipe.title}</p>
                                         {/*<p>{recipe.user_id}</p>*/}
                                         <img src={recipe.image || '/images/recipes/placeholder.jpg'}
                                              alt="Recipe Image"/>
-                                        {/*{recipe.user_id === auth.user.id &&*/}
-                                        {/*    <Link className=' text-white m-4 bg-red-600 py-2 px-6 rounded'*/}
-                                        {/*          as='button'*/}
-                                        {/*          href={route('recipes.destroy', recipe.id)}*/}
-                                        {/*          method="delete">Delete</Link>*/}
-                                        {/*}*/}
+
                                         <Gradient/>
                                     </Card>
+                                    </Link>
                                 </SplideSlide>
                             ))}
                     </Splide>
