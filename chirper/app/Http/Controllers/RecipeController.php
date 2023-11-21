@@ -24,8 +24,11 @@ class RecipeController extends Controller
     private TranslationService $translationService;
     private RecipeService $recipeService;
 
-    public function __construct(RecipeApiService $recipeApiService, TranslationService $translationService, RecipeService $recipeService)
-    {
+    public function __construct(
+        RecipeApiService $recipeApiService,
+        TranslationService $translationService,
+        RecipeService $recipeService
+    ){
         $this->recipeApiService = $recipeApiService;
         $this->translationService = $translationService;
         $this->recipeService = $recipeService;
@@ -78,7 +81,6 @@ class RecipeController extends Controller
      */
     public function show(Recipe $recipe): Response
     {
-
         return Inertia::render('Recipe/UserRecipeDetails', ['recipe' => $recipe]);
     }
 
@@ -213,27 +215,55 @@ class RecipeController extends Controller
      */
     public function destroy(Recipe $recipe): \Illuminate\Http\RedirectResponse
     {
+        if ($recipe->image) {
+            $imagePath = public_path() . $recipe->image;
+            if (file_exists($imagePath)) {
+                unlink($imagePath); // Usunięcie obrazu z dysku
+            }
+        }
         $recipe->delete();
-        return Redirect::back();
+        return redirect()->route('recipes.index');
     }
+
 
     public function handleSearch(Request $request)
     {
-        $searchTerm = $request->input('term');
-        $cacheKey = 'search_results_' . Str::random(10); // Tworzenie unikalnego klucza dla cache
+        $termFromSearch = strtolower($request->input('term'));
+        $cacheKey = 'search_results_' . $termFromSearch; // Klucz cache oparty na oryginalnym terminie
+
+        // Sprawdzenie, czy wyniki są już w cache
+        $cachedResults = Cache::get($cacheKey);
+        if ($cachedResults) {
+            return redirect()->route('searched.recipes', ['cacheKey' => $cacheKey]);
+        }
+
+        // Tłumaczenie terminu wyszukiwania, jeśli wyniki nie są w cache
+        $searchTerm = $this->translationService->translateOne($termFromSearch, 'en');
 
         try {
             $searchResults = $this->recipeApiService->searchRecipes($searchTerm);
-            Cache::put($cacheKey, $searchResults, now()->addMinutes(15)); // Zapis do cache na 15 minut
+
+            $translationMap = ['title' => 'translateOne'];
+
+            foreach ($searchResults as $key => $recipe) {
+                $searchResults[$key] = $this->translateRecipeFields($recipe, $translationMap);
+            }
+
+            // Zapis do cache
+            Cache::put($cacheKey, $searchResults, now()->addMinutes(15));
         } catch (Exception $e) {
             abort(500, 'Wystąpił błąd podczas wyszukiwania przepisów.');
         }
+
         return redirect()->route('searched.recipes', ['cacheKey' => $cacheKey]);
     }
+
 
     public function showSearchedRecipes(Request $request, $cacheKey)
     {
         $searchResults = Cache::get($cacheKey, []);
+
+
 
         return Inertia::render('Recipe/SearchedRecipes', ['searchResults' => $searchResults]);
     }

@@ -25,13 +25,6 @@ class TranslationService
             return ['Text' => $text];
         }, $texts);
 
-        // Make the POST request to the Microsoft Translator API
-//        $translator_response = Http::withHeaders([
-//            'Ocp-Apim-Subscription-Key' => $this->apiKey,
-//            'Content-Type' => 'application/json',
-//            'Ocp-Apim-Subscription-Region' => 'global',
-//        ])->post("{$this->endpoint}/translate?api-version=3.0&to={$to}", $body);
-
         $translator_response = $this->makeRequest($body,$toLanguage);
 
         if ($translator_response->successful()) {

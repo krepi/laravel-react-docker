@@ -36,12 +36,6 @@ Route::get('/dashboard', function () {
 
 
 
-//Route::inertia('/recipes', 'Recipe/Index')->name('recipes.index');
-
-
-//Route::get('/dashboard', [RecipeController::class, 'index'])
-//    ->middleware(['auth', 'verified'])
-//    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -54,11 +48,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/recipe/{id}', [RecipeController::class, 'showRecipeFromApi'])->name('recipe.showRecipeFromApi');
 
 
-
-    // Trasa dla wyszukiwania przepisów
     Route::post('/search', [RecipeController::class, 'handleSearch'])->name('recipes.handleSearch');
 
-// Trasa wyświetlająca wyniki wyszukiwania
     Route::get('/search-results/{cacheKey}', [RecipeController::class, 'showSearchedRecipes'])->name('searched.recipes');
 
 });

@@ -5,52 +5,53 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import DOMPurify from 'dompurify';
 import React, {useState, useEffect} from 'react';
 import {Link} from "@inertiajs/react";
+import {InertiaLink} from "@inertiajs/inertia-react";
+import IngredientListItem from "@/Components/Recipes/IngredientListItem.jsx";
 
 
 const RecipeApiDetails = ({recipe, auth}) => {
     console.log(recipe)
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        // Symulacja pobierania danych, ustaw isLoading na false, gdy dane są gotowe
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 2000); // Załóżmy, że ładowanie trwa 2 sekundy
-
-        return () => clearTimeout(timer);
-    }, []);
-
+    const ingredients = JSON.parse(recipe.ingredients);
     const cleanInstructions = DOMPurify.sanitize(recipe.instructions);
+
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="Recipe"/>
-            {isLoading ? (
-                <SpinnerContainer>
 
-                    <Spinner>Loading...</Spinner>
-                </SpinnerContainer>
-            ) : (
                 <DetailWrapper className='max-w-7xl mx-auto sm:px-6 lg:px-8'>
+                    <div>
+
+                        <InertiaLink className='text-white m-4 bg-blue-600 py-2 px-6 rounded' as='button' href="/recipes">Back</InertiaLink>
+                    </div>
+                    {recipe.user_id === auth.user.id &&
+                        <div>
+                            <Link className=' text-white m-4 bg-red-600 py-2 px-6 rounded'
+                                  as='button'
+                                  href={route('recipes.destroy', recipe.id)}
+                                  method="delete">Delete</Link>
+
+                            <Link className=' text-white m-4 bg-blue-300 py-2 px-6 rounded'
+                                  as='button'
+                                // href={route('recipes.destroy', recipe.id)}
+                                  method="update">Update</Link>
+                        </div>
+                    }
                     <div>
                         <h2>{recipe.title}</h2>
                         <img src={recipe.image} alt={recipe.title}/>
                         <p>porcji: {recipe.servings}</p>
-                        <p>gotowe w: {recipe.readyInMinutes} minut</p>
+                        <p>gotowe w: {recipe.ready_in_minutes} minut</p>
                     </div>
                     <Info>
                         <p dangerouslySetInnerHTML={{__html: cleanInstructions}}/>
                         <ul>
-                            {recipe.extendedIngredients.map((ingredient, index) => (
-                                <li key={ingredient.id + '_' + index}>{ingredient.original}</li>
+                            {ingredients.map((ingredient, index) => (
+                                // <li key={ingredient.name + '_' + index}>{ingredient.name} {ingredient.quantity} {ingredient.unit}</li>
+                                <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient} source={'user'} />
                             ))}
                         </ul>
-                        {/* Wyświetl inne szczegóły przepisu */}
                     </Info>
-                    <Link className=' text-white m-4 bg-red-600 py-2 px-6 rounded'
-                              as='button'
-                              href={route('recipes.destroy', recipe.id)}
-                              method="delete">Delete</Link>
-                </DetailWrapper>)}
+                </DetailWrapper>)
         </AuthenticatedLayout>
     );
 };

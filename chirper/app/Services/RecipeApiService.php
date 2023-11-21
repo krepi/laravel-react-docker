@@ -46,7 +46,7 @@ class RecipeApiService
         $response = Http::get("https://api.spoonacular.com/recipes/complexSearch", [
             'apiKey' => $this->apiKey,
             'query' => $query,
-            'number' => 5
+            'number' => 6
             // Dodaj dodatkowe parametry wyszukiwania, jeśli potrzebujesz
         ]);
 

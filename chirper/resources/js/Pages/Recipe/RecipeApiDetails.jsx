@@ -6,11 +6,12 @@ import DOMPurify from 'dompurify';
 import React, {useState, useEffect} from 'react';
 import IngredientListItem from "@/Components/Recipes/IngredientListItem.jsx";
 import {Inertia} from "@inertiajs/inertia";
+import {InertiaLink} from "@inertiajs/inertia-react";
 
 
 const RecipeApiDetails = ({recipe, auth, message}) => {
     // const [message, setMessage] = useState('');
-    console.log(typeof (recipe.id))
+
     // const [isLoading, setIsLoading] = useState(true);
 
     const formatRecipeForSaving = () => {
@@ -33,18 +34,6 @@ const RecipeApiDetails = ({recipe, auth, message}) => {
     const repcia = formatRecipeForSaving();
     console.log('id from api '+ typeof(repcia.id_from_api))
 
-
-    // const handleSaveRecipe = () => {
-    //     const formattedRecipe = formatRecipeForSaving();
-    //     Inertia.post(route('recipes.store'), formattedRecipe, {
-    //         onSuccess: (response) => {
-    //             setMessage(response.data.message || 'Recipe has been saved successfully.');
-    //         },
-    //         onError: (errors) => {
-    //             setMessage('An error occurred while saving the recipe.');
-    //         }
-    //     });
-    // };
 
     const handleSaveRecipe = () => {
         const formattedRecipe = formatRecipeForSaving();
@@ -75,19 +64,6 @@ const RecipeApiDetails = ({recipe, auth, message}) => {
 
 
 
-
-
-
-
-    // useEffect(() => {
-    //     // Symulacja pobierania danych, ustaw isLoading na false, gdy dane są gotowe
-    //     const timer = setTimeout(() => {
-    //         setIsLoading(false);
-    //     }, 2000); // Załóżmy, że ładowanie trwa 2 sekundy
-    //
-    //     return () => clearTimeout(timer);
-    // }, []);
-
     const cleanInstructions = DOMPurify.sanitize(recipe.instructions);
     return (
         <AuthenticatedLayout user={auth.user}>
@@ -99,7 +75,9 @@ const RecipeApiDetails = ({recipe, auth, message}) => {
             {/*    </SpinnerContainer>*/}
             {/*) : (*/}
                 <DetailWrapper className='max-w-7xl mx-auto sm:px-6 lg:px-8'>
+
                     <div>
+                        <InertiaLink className='text-white m-4 bg-blue-600 py-2 px-6 rounded' as='button' href="/recipes">Back</InertiaLink>
                         {message && (
                             <div className="alert alert-info text-red-600">
                                 {message}
@@ -142,7 +120,7 @@ const RecipeApiDetails = ({recipe, auth, message}) => {
                             {/*))}*/}
                             <ul>
                                 {recipe.extendedIngredients.map((ingredient, index) => (
-                                    <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient} />
+                                    <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient} source={'spoon'} />
                                 ))}
                             </ul>
                         </ul>

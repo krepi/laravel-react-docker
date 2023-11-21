@@ -11,8 +11,6 @@ import UserRecipes from "@/Components/Recipes/UserRecipes.jsx";
 
 
 export default function Index({auth, recipes, apiRecipes, message }) {
-    // console.log(message);
-    // const { message } = usePage().props;
 
     return (
         <AuthenticatedLayout user={auth.user}>
