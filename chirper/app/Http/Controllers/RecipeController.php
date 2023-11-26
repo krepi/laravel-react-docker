@@ -102,7 +102,6 @@ class RecipeController extends Controller
             if (!isset($recipe[$field])) {
                 continue;
             }
-
             if ($method === 'translate') {
                 $recipe[$field] = $this->translationService->translate($recipe[$field]);
             } elseif ($method === 'translateOne') {
@@ -230,21 +229,17 @@ class RecipeController extends Controller
     {
         $termFromSearch = strtolower($request->input('term'));
         $cacheKey = 'search_results_' . $termFromSearch; // Klucz cache oparty na oryginalnym terminie
-
         // Sprawdzenie, czy wyniki są już w cache
         $cachedResults = Cache::get($cacheKey);
         if ($cachedResults) {
             return redirect()->route('searched.recipes', ['cacheKey' => $cacheKey]);
         }
-
         // Tłumaczenie terminu wyszukiwania, jeśli wyniki nie są w cache
         $searchTerm = $this->translationService->translateOne($termFromSearch, 'en');
 
         try {
             $searchResults = $this->recipeApiService->searchRecipes($searchTerm);
-
             $translationMap = ['title' => 'translateOne'];
-
             foreach ($searchResults as $key => $recipe) {
                 $searchResults[$key] = $this->translateRecipeFields($recipe, $translationMap);
             }
@@ -262,9 +257,6 @@ class RecipeController extends Controller
     public function showSearchedRecipes(Request $request, $cacheKey)
     {
         $searchResults = Cache::get($cacheKey, []);
-
-
-
         return Inertia::render('Recipe/SearchedRecipes', ['searchResults' => $searchResults]);
     }
 
