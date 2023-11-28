@@ -24,9 +24,7 @@ class TranslationService
         $body = array_map(function ($text) {
             return ['Text' => $text];
         }, $texts);
-
         $translator_response = $this->makeRequest($body,$toLanguage);
-
         if ($translator_response->successful()) {
             $translated_texts = array_map(function ($translationResult) {
                 return $translationResult['translations'][0]['text'] ?? 'Translation unavailable';
@@ -48,9 +46,6 @@ class TranslationService
     {
         // Prepare the text for translation by wrapping it in an array
         $body = [['Text' => $text]];
-
-
-
         $response = $this->makeRequest($body,$toLanguage);
 
         // Check for success and extract translated text

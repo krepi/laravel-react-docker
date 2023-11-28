@@ -17,7 +17,7 @@ class RecipeApiService
     {
         $response = Http::get("https://api.spoonacular.com/recipes/random", [
             'apiKey' => $this->apiKey,
-            'number' => 5
+            'number' => 8
         ]);
 
         if ($response->successful()) {
@@ -32,7 +32,6 @@ class RecipeApiService
         $response = Http::get("https://api.spoonacular.com/recipes/{$id}/information", [
             'apiKey' => $this->apiKey,
         ]);
-//dump($response);
         if ($response->successful()) {
             return $response->json();
         }

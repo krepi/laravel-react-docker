@@ -32,8 +32,9 @@ const RecipeApiDetails = ({recipe, auth}) => {
 
                             <Link className=' text-white m-4 bg-blue-300 py-2 px-6 rounded'
                                   as='button'
-                                // href={route('recipes.destroy', recipe.id)}
-                                  method="update">Update</Link>
+                                href={route('recipes.edit', recipe.id)}
+                                  // method="update"
+                            >Update</Link>
                         </div>
                     }
                     <div>
