@@ -3,13 +3,15 @@
 namespace App\Services;
 
 use App\Models\Recipe;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Cache;
 
-class RecipeService {
+class RecipeService
+{
 
 
     private $translationService;
@@ -21,11 +23,16 @@ class RecipeService {
         $this->recipeApiService = $recipeApiService;
     }
 
-    public function getAllRecipes() {
+    /**
+     * @return Collection
+     */
+    public function getAllRecipes(): Collection
+    {
         return Recipe::all();
     }
 
-    public function storeRecipe(Request $request) {
+    public function storeRecipe(Request $request)
+    {
         $rules = $this->getValidationRules($request);
 
         try {
@@ -40,22 +47,65 @@ class RecipeService {
 
         }
     }
-    public function updateRecipe(Recipe $recipe, Request $request) {
-        $validatedData = $request->validate([
-            'title' => ['required', 'max:250'],
-            'body' => ['required']
-        ]);
 
-        $recipe->update($validatedData);
-        return $recipe;
+
+    public function updateRecipe(Recipe $recipe, Request $request)
+    {
+        Log::info('Aktualizacja przepisu w serwisie:', ['request' => $request->all(), 'recipeId' => $recipe->id]);
+        $oldImagePath = $recipe->image ? public_path() . $recipe->image : null;
+        // Sprawdzenie, czy zalogowany użytkownik jest właścicielem przepisu
+        if ($recipe->user_id !== Auth::id()) {
+            return ['status' => 'error', 'message' => 'Nie masz uprawnień do edycji tego przepisu.'];
+        }
+
+        // Zasady walidacji
+        $rules = [
+            'title' => 'required|max:250',
+            'ingredients' => 'required|json',
+            'instructions' => 'required|string',
+            'ready_in_minutes' => 'nullable|integer',
+            'servings' => 'nullable|integer',
+            'image' => $request->hasFile('image') ? 'image|max:2048' : '',
+        ];
+
+
+
+        $validatedData = $request->validate($rules);
+
+//        // Aktualizacja przepisu
+        $recipe->fill($validatedData);
+
+        if ($request->hasFile('image')) {
+            // Usunięcie starego obrazka, jeśli istnieje
+            if ($recipe->image) {
+//                $oldImagePath = public_path() . $recipe->image;
+                Log::info('Ścieżka do starego obrazka:', ['oldImagePath' => $oldImagePath]);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+
+            // Dodanie nowego obrazka
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('images/recipes'), $imageName);
+            $recipe->image = '/images/recipes/' . $imageName;
+            Log::info('Ścieżka do starego obrazka:', ['newImagePath' => $recipe->image]);
+        }
+// Aktualizacja przepisu z wyjątkiem obrazka
+//        $recipe->fill($validatedData->except(['image']));
+        $recipe->save();
+
+        return ['status' => 'success', 'recipe' => $recipe, 'message' => 'Przepis został pomyślnie zaktualizowany.'];
     }
 
-    public function deleteRecipe(Recipe $recipe) {
+    public function deleteRecipe(Recipe $recipe)
+    {
         $recipe->delete();
         return ['status' => 'deleted'];
     }
 
-    protected function getValidationRules(Request $request) {
+    protected function getValidationRules(Request $request)
+    {
         $rules = [
             'title' => 'required|max:250',
             'ingredients' => 'required|json',
@@ -81,13 +131,15 @@ class RecipeService {
         return $rules;
     }
 
-    protected function recipeExists($validatedData) {
+    protected function recipeExists($validatedData)
+    {
         return Recipe::where('id_from_api', $validatedData['id_from_api'])
             ->where('user_id', Auth::id())
             ->exists();
     }
 
-    protected function createRecipe($validatedData, $request) {
+    protected function createRecipe($validatedData, $request)
+    {
         $recipe = new Recipe($validatedData);
         $recipe->user_id = Auth::id();
         if ($validatedData['source'] === 'spoon') {
@@ -107,31 +159,18 @@ class RecipeService {
 
     public function cacheApiRecipes(string $cacheKey)
     {
-//        return Cache::remember($cacheKey, now()->addMinutes(30), function () {
-//            $recipesFromApi = $this->recipeApiService->fetchRecipes();
-//            return $this->translateRecipes($recipesFromApi);
-//        });
-//        $cacheKey = 'apiRecipes';
+
         return Cache::remember($cacheKey, now()->addMinutes(30), function () {
             $recipesFromApi = $this->recipeApiService->fetchRecipes();
-//            $translationMap = [
-//                'title' => 'translateOne', // Tłumaczenie tytułu przepisu
-//                // Możliwe inne pola do tłumaczenia, jeśli to konieczne
-//            ];
-//
-//            foreach ($recipesFromApi['recipes'] as $key => $recipe) {
-//                $recipesFromApi['recipes'][$key] = $this->translateRecipeFields($recipe, $translationMap);
-//            }
-//
-//            return $recipesFromApi['recipes'];
+
             return $this->translateRecipes($recipesFromApi);
         });
     }
 
-    protected function translateRecipes($recipesFromApi){
+    protected function translateRecipes($recipesFromApi)
+    {
         $translationMap = [
             'title' => 'translateOne', // Tłumaczenie tytułu przepisu
-            // Możliwe inne pola do tłumaczenia, jeśli to konieczne
         ];
 
         foreach ($recipesFromApi['recipes'] as $key => $recipe) {
@@ -145,12 +184,14 @@ class RecipeService {
     {
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($recipeId) {
             $recipe = $this->recipeApiService->fetchRecipe($recipeId);
-            return $this->translateRecipeFields($recipe,$this->getDetailedTranslationMap());
+            return $this->translateRecipeFields($recipe, $this->getDetailedTranslationMap());
         });
 
 
     }
-private function getDetailedTranslationMap(){
+
+    private function getDetailedTranslationMap(): array
+    {
         return [
             'title' => 'translateOne', // Tłumaczenie pojedynczego pola
             'instructions' => 'translateOne',
@@ -160,42 +201,17 @@ private function getDetailedTranslationMap(){
                     'metric' => [
                         'unitLong' => 'translateOne'
                     ]
-                ]                   // Tłumaczenie zagnieżdżonych pól
+                ]
             ]
 
         ];
-}
+    }
 
-    //public function showRecipeFromApi($recipeId): Response
-//{
-//    $cacheKey = "apiRecipeDetails_{$recipeId}";
-//    $recipe = $this->cacheData($cacheKey, 30, function () use ($recipeId) {
-//        $recipe = $this->recipeApiService->fetchRecipe($recipeId);
-//        $translationMap = [
-//            'title' => 'translateOne', // Tłumaczenie pojedynczego pola
-//            'instructions' => 'translateOne',
-//            'extendedIngredients' => [
-//                'originalName' => 'translateOne',
-//                'measures' => [
-//                    'metric' => [
-//                        'unitLong' => 'translateOne'
-//                    ]
-//                ]                   // Tłumaczenie zagnieżdżonych pól
-//            ]
-//        ];
-//        return $this->translateRecipeFields($recipe, $translationMap);
-//    });
-//
-//    return Inertia::render('Recipe/RecipeApiDetails', [
-//        'recipe' => $recipe,
-//        'message' => session('message')
-//    ]);
-//}
+
 
     // Metody tłumaczenia przeniesione z RecipeController
     public function translateRecipeFields(array $recipe, array $translationMap): array
     {
-        // ... Implementacja metody translateRecipeFields
         foreach ($translationMap as $field => $method) {
             if (!isset($recipe[$field])) {
                 continue;
@@ -217,7 +233,6 @@ private function getDetailedTranslationMap(){
 
     public function translateNestedFields(array $item, array $fieldsToTranslate): array
     {
-        // ... Implementacja metody translateNestedFields
         foreach ($fieldsToTranslate as $nestedField => $nestedMethod) {
             if (isset($item[$nestedField])) {
                 if ($nestedMethod === 'translate') {
@@ -259,37 +274,4 @@ private function getDetailedTranslationMap(){
         return Cache::get($cacheKey, []);
     }
 
-//    protected function translateRecipes(array $recipes): array
-//    {
-//        return array_map(function ($recipe) {
-//            return $this->translateRecipeFields($recipe, $this->getTranslationMap());
-//        }, $recipes);
-//    }
-
 }
-
-//public function showRecipeFromApi($recipeId): Response
-//{
-//    $cacheKey = "apiRecipeDetails_{$recipeId}";
-//    $recipe = $this->cacheData($cacheKey, 30, function () use ($recipeId) {
-//        $recipe = $this->recipeApiService->fetchRecipe($recipeId);
-//        $translationMap = [
-//            'title' => 'translateOne', // Tłumaczenie pojedynczego pola
-//            'instructions' => 'translateOne',
-//            'extendedIngredients' => [
-//                'originalName' => 'translateOne',
-//                'measures' => [
-//                    'metric' => [
-//                        'unitLong' => 'translateOne'
-//                    ]
-//                ]                   // Tłumaczenie zagnieżdżonych pól
-//            ]
-//        ];
-//        return $this->translateRecipeFields($recipe, $translationMap);
-//    });
-//
-//    return Inertia::render('Recipe/RecipeApiDetails', [
-//        'recipe' => $recipe,
-//        'message' => session('message')
-//    ]);
-//}

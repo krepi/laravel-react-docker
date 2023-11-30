@@ -43,9 +43,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('recipes',RecipeController::class)
-    ->only(['index','create','destroy', 'store', 'show', 'edit', 'update']);
+    ->only(['index','create','destroy', 'store', 'show', 'edit','update']);
 
     Route::get('/recipe/{id}', [RecipeController::class, 'showRecipeFromApi'])->name('recipe.showRecipeFromApi');
+    Route::put('/recipe/{id}/update', [RecipeController::class, 'update'])->name('recipe.update');
 
     Route::post('/search', [RecipeController::class, 'handleSearch'])->name('recipes.handleSearch');
 

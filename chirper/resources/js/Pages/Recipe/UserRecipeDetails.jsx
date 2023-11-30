@@ -58,7 +58,7 @@ const RecipeApiDetails = ({recipe, auth}) => {
 };
 
 
-const DetailWrapper = styled.div`
+export const DetailWrapper = styled.div`
     margin: 0 auto;
     margin-top: 10rem;
     margin-bottom: 5rem;
@@ -83,7 +83,7 @@ const DetailWrapper = styled.div`
         margin-top: 2rem;
     }
 `;
-const Info = styled.div`
+export const Info = styled.div`
     margin-left: 10rem;
 `;
 const SpinnerContainer = styled.div`

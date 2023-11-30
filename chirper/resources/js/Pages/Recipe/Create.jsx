@@ -73,17 +73,7 @@ export default function Create({auth}) {
     });
     const [image, setImage] = useState(null);
 
-    // const handleChange = (e) => {
-    //     const {name, value} = e.target;
-    //     if (name.startsWith('ingredient')) {
-    //         const index = parseInt(name.split('_')[1], 10);
-    //         const newIngredients = [...values.ingredients];
-    //         newIngredients[index][e.target.dataset.type] = value;
-    //         setValues({...values, ingredients: newIngredients});
-    //     } else {
-    //         setValues({...values, [name]: value});
-    //     }
-    // };
+
 
 
     const handleChange = (e) => {
@@ -139,6 +129,7 @@ export default function Create({auth}) {
                 'Content-Type': 'multipart/form-data',
             },
         });
+
     };
 
     return (

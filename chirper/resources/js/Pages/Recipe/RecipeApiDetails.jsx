@@ -93,10 +93,10 @@ const RecipeApiDetails = ({recipe, auth, message}) => {
                             Save Recipe to Database
                         </button>
                         {/*{message && <p>{message}</p>}*/}
-                    <Link className=' text-white m-4 bg-yellow-500 py-2 px-6 rounded'
-                          as='button'
-                          // href={route('recipes.destroy', recipe.id)}
-                          method="delete">Like</Link>
+                    {/*<Link className=' text-white m-4 bg-yellow-500 py-2 px-6 rounded'*/}
+                    {/*      as='button'*/}
+                    {/*      // href={route('recipes.destroy', recipe.id)}*/}
+                    {/*      method="delete">Like</Link>*/}
                     </div>
                     <div>
                         <h2>{recipe.title}</h2>
