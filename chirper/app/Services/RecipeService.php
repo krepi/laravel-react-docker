@@ -51,13 +51,11 @@ class RecipeService
 
     public function updateRecipe(Recipe $recipe, Request $request)
     {
-        Log::info('Aktualizacja przepisu w serwisie:', ['request' => $request->all(), 'recipeId' => $recipe->id]);
+//        Log::info('Aktualizacja przepisu w serwisie:', ['request' => $request->all(), 'recipeId' => $recipe->id]);
         $oldImagePath = $recipe->image ? public_path() . $recipe->image : null;
-        // Sprawdzenie, czy zalogowany użytkownik jest właścicielem przepisu
         if ($recipe->user_id !== Auth::id()) {
             return ['status' => 'error', 'message' => 'Nie masz uprawnień do edycji tego przepisu.'];
         }
-
         // Zasady walidacji
         $rules = [
             'title' => 'required|max:250',
@@ -68,31 +66,25 @@ class RecipeService
             'image' => $request->hasFile('image') ? 'image|max:2048' : '',
         ];
 
-
-
         $validatedData = $request->validate($rules);
 
 //        // Aktualizacja przepisu
         $recipe->fill($validatedData);
 
         if ($request->hasFile('image')) {
-            // Usunięcie starego obrazka, jeśli istnieje
+
             if ($recipe->image) {
-//                $oldImagePath = public_path() . $recipe->image;
-                Log::info('Ścieżka do starego obrazka:', ['oldImagePath' => $oldImagePath]);
+//                Log::info('Ścieżka do starego obrazka:', ['oldImagePath' => $oldImagePath]);
                 if (file_exists($oldImagePath)) {
                     unlink($oldImagePath);
                 }
             }
 
-            // Dodanie nowego obrazka
             $imageName = time() . '.' . $request->image->extension();
             $request->image->move(public_path('images/recipes'), $imageName);
             $recipe->image = '/images/recipes/' . $imageName;
             Log::info('Ścieżka do starego obrazka:', ['newImagePath' => $recipe->image]);
         }
-// Aktualizacja przepisu z wyjątkiem obrazka
-//        $recipe->fill($validatedData->except(['image']));
         $recipe->save();
 
         return ['status' => 'success', 'recipe' => $recipe, 'message' => 'Przepis został pomyślnie zaktualizowany.'];
@@ -100,8 +92,14 @@ class RecipeService
 
     public function deleteRecipe(Recipe $recipe)
     {
+        if ($recipe->image) {
+            $imagePath = public_path() . $recipe->image;
+            if (file_exists($imagePath)) {
+                unlink($imagePath); // Usunięcie obrazu z dysku
+            }
+        }
         $recipe->delete();
-        return ['status' => 'deleted'];
+
     }
 
     protected function getValidationRules(Request $request)

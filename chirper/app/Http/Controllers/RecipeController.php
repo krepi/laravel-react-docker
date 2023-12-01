@@ -1,25 +1,33 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
 use App\Models\Recipe;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Services\RecipeService;
 
+/**
+ *
+ */
 class RecipeController extends Controller
 {
 
+    /**
+     * @var RecipeService
+     */
     private RecipeService $recipeService;
 
+    /**
+     * @param RecipeService $recipeService
+     */
     public function __construct(
         RecipeService $recipeService
-    ){
+    )
+    {
 
         $this->recipeService = $recipeService;
     }
@@ -34,7 +42,6 @@ class RecipeController extends Controller
     {
         return Inertia::render('Recipe/Index', [
             'recipes' => $this->recipeService->getAllRecipes(),
-//            'apiRecipes' => $this->getApiRecipes(),
             'apiRecipes' => $this->recipeService->cacheApiRecipes('apiRecipes'),
             'message' => session('message')
 
@@ -75,13 +82,10 @@ class RecipeController extends Controller
         return Inertia::render('Recipe/UserRecipeDetails', ['recipe' => $recipe]);
     }
 
-
-//    protected function cacheData($cacheKey, $durationInMinutes, Closure $callback)
-//    {
-//        return cache()->remember($cacheKey, now()->addMinutes($durationInMinutes), $callback);
-//    }
-
-
+    /**
+     * @param $recipeId
+     * @return Response
+     */
     public function showRecipeFromApi($recipeId): Response
     {
         $cacheKey = "apiRecipeDetails_{$recipeId}";
@@ -104,22 +108,15 @@ class RecipeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Recipe $recipe)
+    public function update(Request $request, Recipe $recipe): RedirectResponse
     {
-        Log::info('Updating recipe', ['request' => $request->all(), 'recipeId' => $recipe->id]);
-
         $result = $this->recipeService->updateRecipe($recipe, $request);
 
         if ($result['status'] === 'validation_error') {
-            // Obsługa błędów walidacji
             return Redirect::back()->withErrors($result['errors']);
         } elseif ($result['status'] === 'error') {
-            // Obsługa innych błędów (np. brak uprawnień)
             return Redirect::back()->with('error', $result['message']);
         }
-
-//        return Redirect::back()->with('message', $result['message']);
-//        return Redirect::back();
         return redirect()->route('recipes.show', $recipe->id)->with('message', $result['message']);
     }
 
@@ -128,17 +125,15 @@ class RecipeController extends Controller
      */
     public function destroy(Recipe $recipe): RedirectResponse
     {
-        if ($recipe->image) {
-            $imagePath = public_path() . $recipe->image;
-            if (file_exists($imagePath)) {
-                unlink($imagePath); // Usunięcie obrazu z dysku
-            }
-        }
-        $recipe->delete();
+        $this->recipeService->deleteRecipe($recipe);
         return redirect()->route('recipes.index');
     }
 
 
+    /**
+     * @param Request $request
+     * @return RedirectResponse
+     */
     public function handleSearch(Request $request): RedirectResponse
     {
         $termFromSearch = strtolower($request->input('term'));
@@ -147,13 +142,15 @@ class RecipeController extends Controller
         return redirect()->route('searched.recipes', ['cacheKey' => $cacheKey]);
     }
 
+    /**
+     * @param $cacheKey
+     * @return Response
+     */
     public function showSearchedRecipes($cacheKey): Response
     {
         $searchResults = $this->recipeService->showSearchedRecipes($cacheKey);
         return Inertia::render('Recipe/SearchedRecipes', ['searchResults' => $searchResults]);
     }
-
-
 
 
 }
