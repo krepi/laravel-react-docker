@@ -3,28 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\Recipe;
-use App\Services\TranslationService;
-use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Facades\Http;
-use App\Services\RecipeApiService;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
+use App\Services\RecipeService;
 
+/**
+ *
+ */
 class RecipeController extends Controller
 {
 
-    private RecipeApiService $recipeApiService;
-    private TranslationService $translationService;
+    /**
+     * @var RecipeService
+     */
+    private RecipeService $recipeService;
 
-    public function __construct(RecipeApiService $recipeApiService, TranslationService $translationService)
+    /**
+     * @param RecipeService $recipeService
+     */
+    public function __construct(
+        RecipeService $recipeService
+    )
     {
-        $this->recipeApiService = $recipeApiService;
-        $this->translationService = $translationService;
+
+        $this->recipeService = $recipeService;
     }
 
 
@@ -32,85 +37,22 @@ class RecipeController extends Controller
      * Display a listing of the resource.
      */
 
-//    public function index(): Response
-//    {
-//        $recipes = Recipe::all();
-//
-//        $cacheKey = 'apiRecipes';
-//        if (cache()->has($cacheKey)) {
-//            $apiRecipes = cache()->get($cacheKey);
-//        } else {
-//            $apiRecipes = $this->recipeApiService->fetchRecipes();
-//            $titles_to_translate = array_column($apiRecipes['recipes'], 'title');
-//
-//            $translatedTitles = $this->translationService->translate($titles_to_translate);
-//
-//            foreach ($apiRecipes['recipes'] as $index => $recipe) {
-//                if (isset($translatedTitles[$index])) {
-//                    $apiRecipes['recipes'][$index]['title'] = $translatedTitles[$index];
-//                }
-//            }
-//
-//            cache()->put($cacheKey, $apiRecipes, now()->addMinutes(30));
-//        }
-//
-//        return Inertia::render('Recipe/Index', [
-//            'recipes' => $recipes,
-//            'apiRecipes' => $apiRecipes
-//        ]);
-//
-//    }
+
     public function index(): Response
     {
-//        $cacheKey = 'apiRecipes';
-//        $apiRecipes = cache()->remember($cacheKey, now()->addMinutes(30), function () {
-//            $recipesFromApi = $this->recipeApiService->fetchRecipes();
-//            $titles = array_column($recipesFromApi['recipes'], 'title');
-//            $translatedTitles = $this->translationService->translate($titles);
-//
-//            array_walk($recipesFromApi['recipes'], function (&$recipe, $index) use ($translatedTitles) {
-//                $recipe['title'] = $translatedTitles[$index] ?? $recipe['title'];
-//            });
-//
-//            return $recipesFromApi;
-//        });
-//
-//        return Inertia::render('Recipe/Index', [
-//            'recipes' => Recipe::all(),
-//            'apiRecipes' => $apiRecipes
-//        ]);
         return Inertia::render('Recipe/Index', [
-            'recipes' => $this->getLocalRecipes(),
-            'apiRecipes' => $this->getApiRecipes()
+            'recipes' => $this->recipeService->getAllRecipes(),
+            'apiRecipes' => $this->recipeService->cacheApiRecipes('apiRecipes'),
+            'message' => session('message')
+
         ]);
 
-    }
-
-    protected function getLocalRecipes()
-    {
-        return Recipe::all();
-    }
-
-    protected function getApiRecipes()
-    {
-        $cacheKey = 'apiRecipes';
-        return cache()->remember($cacheKey, now()->addMinutes(30), function () {
-            $recipesFromApi = $this->recipeApiService->fetchRecipes();
-            $titles = array_column($recipesFromApi['recipes'], 'title');
-            $translatedTitles = $this->translationService->translate($titles);
-
-            array_walk($recipesFromApi['recipes'], function (&$recipe, $index) use ($translatedTitles) {
-                $recipe['title'] = $translatedTitles[$index] ?? $recipe['title'];
-            });
-
-            return $recipesFromApi['recipes'];
-        });
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): Response
     {
         return Inertia::render('Recipe/Create');
     }
@@ -118,46 +60,42 @@ class RecipeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): \Illuminate\Http\RedirectResponse
-    {
-        $recipe = new Recipe($request->validate([
-            'title' => ['required', 'max:250'],
-            'body' => ['required']
-        ]));
-        $recipe->user_id = auth()->id();
-        $recipe->save();
 
-        return Redirect::route('recipes.index');
+
+    public function store(Request $request): RedirectResponse
+    {
+        $result = $this->recipeService->storeRecipe($request);
+
+        if ($result['status'] === 'validation_error') {
+
+            return redirect()->back()->with('message', 'Ten przepis już istnieje w Twojej kolekcji.');
+        }
+        return redirect()->back()->with('message', 'Przepis został pomyślnie zapisany.');
     }
+
 
     /**
      * Display the specified resource.
      */
     public function show(Recipe $recipe): Response
     {
-        return Inertia::render('Recipe/Show', ['recipe' => $recipe]);
+        return Inertia::render('Recipe/UserRecipeDetails', ['recipe' => $recipe]);
     }
 
     /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws Exception
+     * @param $recipeId
+     * @return Response
      */
-
     public function showRecipeFromApi($recipeId): Response
     {
         $cacheKey = "apiRecipeDetails_{$recipeId}";
-
-        // Pobierz przepis z cache lub, jeśli nie istnieje, pobierz z API i zapisz w cache.
-        $recipe = cache()->remember($cacheKey, now()->addMinutes(30), function () use ($recipeId) {
-            $recipe = $this->recipeApiService->fetchRecipe($recipeId);
-            $translatedTitle = $this->translationService->translateOne($recipe['title']);
-            $recipe['title'] = $translatedTitle;
-            return $recipe;
-        });
-
-        return Inertia::render('Recipe/RecipeApiDetails', ['recipe' => $recipe]);
+        $recipe = $this->recipeService->cacheRecipeDetails($recipeId, $cacheKey);
+        return Inertia::render('Recipe/RecipeApiDetails', [
+            'recipe' => $recipe,
+            'message' => session('message')
+        ]);
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -170,24 +108,49 @@ class RecipeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Recipe $recipe): \Illuminate\Http\RedirectResponse
+    public function update(Request $request, Recipe $recipe): RedirectResponse
     {
-        $recipe->update(
-            $request->validate([
-                'title' => ['required', 'max:250'],
-                'body' => ['required']
-            ])
-        );
+        $result = $this->recipeService->updateRecipe($recipe, $request);
 
-        return Redirect::back();
+        if ($result['status'] === 'validation_error') {
+            return Redirect::back()->withErrors($result['errors']);
+        } elseif ($result['status'] === 'error') {
+            return Redirect::back()->with('error', $result['message']);
+        }
+        return redirect()->route('recipes.show', $recipe->id)->with('message', $result['message']);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Recipe $recipe): \Illuminate\Http\RedirectResponse
+    public function destroy(Recipe $recipe): RedirectResponse
     {
-        $recipe->delete();
-        return Redirect::back();
+        $this->recipeService->deleteRecipe($recipe);
+        return redirect()->route('recipes.index');
     }
+
+
+    /**
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function handleSearch(Request $request): RedirectResponse
+    {
+        $termFromSearch = strtolower($request->input('term'));
+        $cacheKey = 'search_results_' . $termFromSearch;
+        $this->recipeService->handleRecipeSearch($termFromSearch, $cacheKey);
+        return redirect()->route('searched.recipes', ['cacheKey' => $cacheKey]);
+    }
+
+    /**
+     * @param $cacheKey
+     * @return Response
+     */
+    public function showSearchedRecipes($cacheKey): Response
+    {
+        $searchResults = $this->recipeService->showSearchedRecipes($cacheKey);
+        return Inertia::render('Recipe/SearchedRecipes', ['searchResults' => $searchResults]);
+    }
+
+
 }

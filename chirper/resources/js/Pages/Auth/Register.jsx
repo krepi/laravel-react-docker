@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import GuestLayout from '@/Layouts/GuestLayout';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+import InputError from '@/Components/common/InputError.jsx';
+import InputLabel from '@/Components/common/InputLabel.jsx';
+import PrimaryButton from '@/Components/common/PrimaryButton.jsx';
+import TextInput from '@/Components/common/TextInput.jsx';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Register() {
