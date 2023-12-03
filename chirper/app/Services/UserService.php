@@ -20,6 +20,8 @@ class UserService
     }
 
 
+
+
     public function deleteUserAndRecipes($userId) {
         try {
             DB::beginTransaction();
@@ -43,7 +45,18 @@ class UserService
     }
 
 
+    public function isAuthorizedToViewProfile($currentUser, $profileUserId): bool
+    {
+        return $currentUser->id == $profileUserId || $currentUser->isAdmin();
+    }
 
+    public function getUserWithRoleById($userId) {
+        $user = User::with('role')->find($userId);
+        if (!$user) {
+            throw new ModelNotFoundException('Użytkownik nie został znaleziony.');
+        }
+        return $user;
+    }
 
 
 

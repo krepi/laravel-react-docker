@@ -35,6 +35,13 @@ class RecipeService
 
     }
 
+
+    public function getUserRecipes($userId,$perPage = 10) {
+        return Recipe::where('user_id', $userId)->paginate($perPage);
+    }
+
+
+
     public function storeRecipe(Request $request)
     {
         $rules = $this->getValidationRules($request);

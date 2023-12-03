@@ -49,6 +49,19 @@ class RecipeController extends Controller
 
     }
 
+    public function showUserRecipes($userId) {
+        $currentUser = auth()->user();
+
+        // Sprawdź, czy zalogowany użytkownik jest administratorem lub właścicielem przepisów
+        if ($currentUser->id == $userId || $currentUser->isAdmin()) {
+            $recipes = $this->recipeService->getUserRecipes($userId);
+            return Inertia::render('UserRecipes', ['recipes' => $recipes]);
+        } else {
+            // Odpowiednia obsługa braku dostępu
+            abort(403, 'Brak dostępu');
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      */
