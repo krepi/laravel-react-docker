@@ -65,12 +65,12 @@ class RecipeController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $result = $this->recipeService->storeRecipe($request);
-
         if ($result['status'] === 'validation_error') {
 
             return redirect()->back()->with('message', 'Ten przepis już istnieje w Twojej kolekcji.');
         }
-        return redirect()->back()->with('message', 'Przepis został pomyślnie zapisany.');
+        return redirect()->route('recipes.show', ['recipe' => $result['recipe']->id])
+            ->with('message', 'Przepis został pomyślnie zapisany.');
     }
 
 

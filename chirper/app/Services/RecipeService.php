@@ -27,8 +27,12 @@ class RecipeService
      * @return Collection
      */
     public function getAllRecipes(): Collection
-    {
-        return Recipe::all();
+{
+    return Recipe::all();
+}
+    public function getPaginatedRecipes($perPage = 10) {
+        return Recipe::paginate($perPage);
+
     }
 
     public function storeRecipe(Request $request)

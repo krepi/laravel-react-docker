@@ -14,7 +14,7 @@ export default function Dashboard({auth, recipes, apiRecipes}) {
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         {/*<Search/>*/}
                         <NavLink href={route('admin.dashboard')} active={route().current('admin.dashboard')}>
-                            Admin dszek
+                            Admin daszboard
                         </NavLink>
                     </div>
                 </div>
