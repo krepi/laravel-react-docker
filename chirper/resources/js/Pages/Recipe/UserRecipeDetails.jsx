@@ -23,7 +23,7 @@ const RecipeApiDetails = ({recipe, auth}) => {
 
                         <InertiaLink className='text-white m-4 bg-blue-600 py-2 px-6 rounded' as='button' href="/recipes">Back</InertiaLink>
                     </div>
-                    {recipe.user_id === auth.user.id &&
+                    {(recipe.user_id === auth.user.id || auth.user.role_id === 4 ) &&
                         <div>
                             <Link className=' text-white m-4 bg-red-600 py-2 px-6 rounded'
                                   as='button'

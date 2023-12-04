@@ -24,7 +24,8 @@ class AdminController extends Controller
     }
 
 
-    public function dashboard(Request $request) {
+    public function dashboard(Request $request)
+    {
         $data = [
             'users' => $this->userService->getPaginatedUsers(),
             'recipes' => $this->recipeService->getPaginatedRecipes(),
@@ -38,16 +39,15 @@ class AdminController extends Controller
     }
 
 
-
-    public function deleteUser($userId)
+    public function deleteUser($userId): \Illuminate\Http\RedirectResponse
     {
-        $result = $this->userService->deleteUserAndRecipes($userId);
-
-        if ($result['status'] === 'success') {
+        try {
+            $result = $this->userService->deleteUserAndRecipes($userId);
             return Redirect::back()->with('message', $result['message']);
-        } else {
-            return Redirect::back()->withErrors(['error' => $result['message']]);
+        } catch (\Exception $e) {
+            return Redirect::back()->withErrors(['error' => $e->getMessage()]);
         }
     }
+
 
 }

@@ -37,7 +37,7 @@ class RecipePolicy
      */
     public function update(User $user, Recipe $recipe): bool
     {
-        return $user->id === $recipe->user_id;
+        return $user->id === $recipe->user_id || $user->isAdmin();
     }
 
     /**
@@ -45,7 +45,7 @@ class RecipePolicy
      */
     public function delete(User $user, Recipe $recipe): bool
     {
-        return $user->id === $recipe->user_id;
+        return $user->id === $recipe->user_id || $user->isAdmin();
     }
 
 

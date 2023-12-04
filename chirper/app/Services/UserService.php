@@ -20,16 +20,19 @@ class UserService
     }
 
 
-
+// UserService.php
 
     public function deleteUserAndRecipes($userId) {
         try {
             DB::beginTransaction();
 
             $user = User::findOrFail($userId);
-            if ($user->hasRole('admin')) {
-                return ['status' => 'error', 'message' => 'Nie można usunąć konta administratora.'];
+
+            // Sprawdź, czy użytkownik jest administratorem
+            if ($user->isAdmin()) {
+                throw new \Exception('Nie można usunąć konta administratora.');
             }
+
             // Usuń przepisy użytkownika
             $user->recipes()->delete();
 
@@ -40,7 +43,8 @@ class UserService
             return ['status' => 'success', 'message' => 'Użytkownik i jego przepisy zostały usunięte.'];
         } catch (Exception $e) {
             DB::rollBack();
-            return ['status' => 'error', 'message' => 'Wystąpił błąd podczas usuwania użytkownika i jego przepisów.'];
+            // Rzuć wyjątek, aby kontroler mógł go obsłużyć
+            throw $e;
         }
     }
 

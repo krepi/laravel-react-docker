@@ -123,6 +123,7 @@ class RecipeController extends Controller
      */
     public function update(Request $request, Recipe $recipe): RedirectResponse
     {
+        $this->authorize('update', $recipe);
         $result = $this->recipeService->updateRecipe($recipe, $request);
 
         if ($result['status'] === 'validation_error') {
@@ -136,11 +137,20 @@ class RecipeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+
     public function destroy(Recipe $recipe): RedirectResponse
     {
-        $this->recipeService->deleteRecipe($recipe);
-        return redirect()->route('recipes.index');
+        $this->authorize('delete', $recipe);
+
+        try {
+            $this->recipeService->deleteRecipe($recipe);
+            return redirect()->route('recipes.index')->with('success', 'Przepis został usunięty.');
+        } catch (\Exception $e) {
+            // Logowanie błędu lub inna obsługa wyjątku
+            return redirect()->back()->with('error', 'Wystąpił błąd podczas usuwania przepisu.');
+        }
     }
+
 
 
     /**
