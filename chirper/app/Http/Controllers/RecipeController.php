@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Recipe;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -49,18 +50,18 @@ class RecipeController extends Controller
 
     }
 
-    public function showUserRecipes($userId) {
-        $currentUser = auth()->user();
-
-        // Sprawdź, czy zalogowany użytkownik jest administratorem lub właścicielem przepisów
-        if ($currentUser->id == $userId || $currentUser->isAdmin()) {
-            $recipes = $this->recipeService->getUserRecipes($userId);
-            return Inertia::render('UserRecipes', ['recipes' => $recipes]);
-        } else {
-            // Odpowiednia obsługa braku dostępu
-            abort(403, 'Brak dostępu');
-        }
-    }
+//    public function showUserRecipes($userId) {
+//        $currentUser = auth()->user();
+//
+//        // Sprawdź, czy zalogowany użytkownik jest administratorem lub właścicielem przepisów
+//        if ($currentUser->id == $userId || $currentUser->isAdmin()) {
+//            $recipes = $this->recipeService->getUserRecipes($userId);
+//            return Inertia::render('UserRecipes', ['recipes' => $recipes]);
+//        } else {
+//            // Odpowiednia obsługa braku dostępu
+//            abort(403, 'Brak dostępu');
+//        }
+//    }
 
     /**
      * Show the form for creating a new resource.
@@ -173,6 +174,67 @@ class RecipeController extends Controller
     {
         $searchResults = $this->recipeService->showSearchedRecipes($cacheKey);
         return Inertia::render('Recipe/SearchedRecipes', ['searchResults' => $searchResults]);
+    }
+
+//    public function storeUserRecipe(Request $request)
+//    {
+//        $recipeId = $request->input('recipeId');
+//        // Znajdź oryginalny przepis lub zwróć błąd 404, jeśli nie istnieje
+//        $originalRecipe = Recipe::findOrFail($recipeId);
+//
+//        // Utwórz nową instancję przepisu i skopiuj dane
+//        $userRecipe = $originalRecipe->replicate();
+//
+//        // Przypisz bieżącego użytkownika jako właściciela nowej kopii
+//        $userRecipe->user_id = Auth::id();
+//
+//        // Zapisz nową kopię przepisu w bazie danych
+//        $userRecipe->save();
+//
+//        // Zwróć odpowiedź, na przykład przekierowanie do nowo utworzonego przepisu
+//        return redirect()->route('recipes.show', $userRecipe->id);
+//    }
+//    public function storeUserRecipe(Request $request): RedirectResponse
+//    {
+//        $recipeId = $request->input('recipeId');
+//        $userRecipe = $this->recipeService->storeUserRecipe($recipeId, Auth::id());
+//
+//        return redirect()->route('recipes.show', $userRecipe->id);
+//    }
+
+
+//    public function storeUserRecipe(Request $request): RedirectResponse
+//    {
+//        $recipeId = $request->input('recipeId');
+//        $response = $this->recipeService->storeUserRecipe($recipeId, Auth::id());
+//
+////        if (isset($response['status']) && $response['status'] === 'error') {
+//        $data= $response->getData();
+//        if (isset($data->status) && $data->status === 'error') {
+//            // Przekierowanie z powrotem na stronę oryginalnego przepisu z komunikatem błędu
+//            return redirect()->route('recipes.show', $recipeId)
+//                ->with('error', $response['message']);
+//        }
+//
+//        // W przypadku sukcesu przekieruj na stronę nowego przepisu
+//        return redirect()->route('recipes.show', $response['recipe']->id);
+//    }
+
+    public function storeUserRecipe(Request $request): RedirectResponse
+    {
+        $recipeId = $request->input('recipeId');
+        $response = $this->recipeService->storeUserRecipe($recipeId, Auth::id());
+
+        // Sprawdzenie, czy odpowiedź jest instancją JsonResponse (co oznacza błąd)
+        if ($response instanceof \Illuminate\Http\JsonResponse) {
+            // Przekierowanie z powrotem na stronę oryginalnego przepisu z komunikatem błędu
+            return redirect()->route('recipes.show', $recipeId)
+                ->with('error', $response->getData()->message);
+        }
+
+        // W przypadku sukcesu przekieruj na stronę nowego przepisu
+        return redirect()->route('recipes.show', $response->id)
+            ->with('success', 'Przepis został pomyślnie zapisany');
     }
 
 

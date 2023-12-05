@@ -283,4 +283,70 @@ class RecipeService
         return Cache::get($cacheKey, []);
     }
 
+//    public function storeUserRecipe($recipeId, $userId)
+//    {
+//        $originalRecipe = Recipe::findOrFail($recipeId);
+//        if (Recipe::where('user_id', $userId)->where('id_from_api', $originalRecipe->id_from_api)->exists()) {
+//            // Obsługa sytuacji, gdy przepis już istnieje
+//            return response()->json(['message' => 'Posiadasz już ten przepis.'], 409); // Przykładowy komunikat błędu
+//        }
+//        $userRecipe = $originalRecipe->replicate();
+//        $userRecipe->user_id = $userId;
+//        $userRecipe->save();
+//
+//        return $userRecipe;
+//    }
+
+
+    public function storeUserRecipe($recipeId, $userId)
+    {
+        $originalRecipe = Recipe::findOrFail($recipeId);
+
+        if (Recipe::where('user_id', $userId)->where('id_from_api', $originalRecipe->id_from_api)->exists()) {
+            return response()->json(['message' => 'Posiadasz już ten przepis.'], 409);
+        }
+
+        $userRecipe = $originalRecipe->replicate();
+        $userRecipe->user_id = $userId;
+
+        if ($this->isLocalImage($originalRecipe->image)) {
+            $newImagePath = $this->copyImage($originalRecipe->image);
+            $userRecipe->image = $newImagePath;
+        } else {
+            // Jeśli to zewnętrzny URL, po prostu przypisz ten sam URL
+            $userRecipe->image = $originalRecipe->image;
+        }
+
+        $userRecipe->save();
+
+        return $userRecipe;
+    }
+
+    protected function isLocalImage($imagePath)
+    {
+        // Sprawdź, czy ścieżka obrazka wskazuje na zasób lokalny
+        return !filter_var($imagePath, FILTER_VALIDATE_URL) && file_exists(public_path($imagePath));
+    }
+
+    protected function copyImage($imagePath)
+    {
+        // Pobranie tylko nazwy pliku z oryginalnej ścieżki
+        $originalFileName = basename($imagePath);
+
+        // Utworzenie nowej nazwy pliku z unikalnym prefiksem
+        $newImageName = time() . '-' . $originalFileName;
+        $newImagePath = public_path('images/recipes') . '/' . $newImageName;
+
+        // Skopiowanie pliku, jeśli istnieje
+        if (file_exists(public_path($imagePath))) {
+            copy(public_path($imagePath), $newImagePath);
+        }
+
+        return '/images/recipes/' . $newImageName;
+    }
+
+
+
+
+
 }

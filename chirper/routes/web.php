@@ -43,6 +43,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('recipes', RecipeController::class)
         ->only(['index', 'create', 'destroy', 'store', 'show', 'edit', 'update']);
 
+    Route::post('/recipe/save-as-user', [RecipeController::class, 'storeUserRecipe'])->name('recipes.storeUserRecipe');
+
     Route::get('/recipe/{id}', [RecipeController::class, 'showRecipeFromApi'])->name('recipe.showRecipeFromApi');
     Route::put('/recipe/{id}/update', [RecipeController::class, 'update'])->name('recipe.update');
 
