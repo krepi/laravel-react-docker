@@ -13,6 +13,7 @@ import {Inertia} from "@inertiajs/inertia";
 const RecipeApiDetails = ({recipe, auth}) => {
     const { flash } = usePage().props;
     console.log(flash)
+    console.log(recipe)
     const ingredients = JSON.parse(recipe.ingredients);
     const cleanInstructions = DOMPurify.sanitize(recipe.instructions);
     const saveRecipeAsUser = () => {

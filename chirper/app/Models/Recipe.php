@@ -18,7 +18,9 @@ class Recipe extends Model
         'servings',
         'image',
         'user_id',
-        'source', // Dodaj 'source' do listy fillable
+        'source',
+        'id_from_api',
+
     ];
 
 
