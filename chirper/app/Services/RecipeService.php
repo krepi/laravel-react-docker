@@ -122,14 +122,27 @@ class RecipeService
         $this->recipeRepository->delete($recipe);
     }
 
-    
+
+//    public function cacheApiRecipes(string $cacheKey)
+//    {
+//
+//        return Cache::remember($cacheKey, now()->addMinutes(30), function () {
+//            $recipesFromApi = $this->recipeApiService->fetchRecipes();
+//
+//            return $this->translateRecipes($recipesFromApi);
+//        });
+//    }
     public function cacheApiRecipes(string $cacheKey)
     {
-
         return Cache::remember($cacheKey, now()->addMinutes(30), function () {
-            $recipesFromApi = $this->recipeApiService->fetchRecipes();
+            $response = $this->recipeApiService->fetchRecipes();
 
-            return $this->translateRecipes($recipesFromApi);
+            if ($response['success']) {
+                return $this->translateRecipes($response['data']);
+            } else {
+                // Przekazanie błędu, jeśli wystąpił
+                return ['success' => false, 'error' => $response['error']];
+            }
         });
     }
 
@@ -174,7 +187,6 @@ class RecipeService
     }
 
 
-    // Metody tłumaczenia przeniesione z RecipeController
     public function translateRecipeFields(array $recipe, array $translationMap): array
     {
         foreach ($translationMap as $field => $method) {
@@ -217,16 +229,62 @@ class RecipeService
         return $item;
     }
 
+//    public function handleRecipeSearch(string $term, string $cacheKey)
+//    {
+//        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($term) {
+//            try {
+//
+//                $searchTerm = $this->translationService->translateOne($term ,'en');
+//                $searchResults = $this->recipeApiService->searchRecipes($searchTerm);
+////                $searchResults = $this->recipeApiService->searchRecipes($term);
+//                foreach ($searchResults as $key => $recipe) {
+//                    $searchResults[$key] = $this->translateRecipeFields($recipe, ['title' => 'translateOne']);
+//                }
+//                return $searchResults;
+//            } catch (Exception $e) {
+//                // Obsługa wyjątku
+//                return [];
+//            }
+//        });
+//    }
+
+    public function extractAndTranslateQuery($term): array
+    {
+        $original = '';
+        $translated = '';
+
+        $start = strpos($term, 'query=');
+        if ($start !== false) {
+            $start += strlen('query=');
+            $end = strpos($term, '&', $start);
+            $original = $end !== false ? substr($term, $start, $end - $start) : substr($term, $start);
+
+            if (!empty($original)) {
+                $translated = $this->translationService->translateOne($original, 'en');
+            }
+        }
+
+        return ['original' => $original, 'translated' => $translated];
+    }
+
     public function handleRecipeSearch(string $term, string $cacheKey)
     {
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($term) {
             try {
-                $searchTerm = $this->translationService->translateOne($term, 'en');
-                $searchResults = $this->recipeApiService->searchRecipes($searchTerm);
+                $queryParts = $this->extractAndTranslateQuery($term);
+                $originalQuery = $queryParts['original'];
+                $translatedQuery = $queryParts['translated'];
+
+                if (!empty($originalQuery) && !empty($translatedQuery)) {
+                    $term = str_replace('query=' . $originalQuery, 'query=' . $translatedQuery, $term);
+                }
+
+                $searchResults = $this->recipeApiService->searchRecipes($term);
                 foreach ($searchResults as $key => $recipe) {
                     $searchResults[$key] = $this->translateRecipeFields($recipe, ['title' => 'translateOne']);
                 }
                 return $searchResults;
+
             } catch (Exception $e) {
                 // Obsługa wyjątku
                 return [];

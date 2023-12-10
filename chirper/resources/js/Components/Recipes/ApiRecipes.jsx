@@ -6,7 +6,7 @@ import styled from "styled-components";
 
 export default function ApiRecipes({apiRecipes}) {
     return (
-        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div className="max-w-8xl mx-auto sm:px-6 lg:px-8">
             <h2>Przepisy z API</h2>
             <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg px-4 py-4">
                 <Wrapper>
