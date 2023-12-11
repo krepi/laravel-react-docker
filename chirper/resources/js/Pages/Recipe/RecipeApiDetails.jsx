@@ -10,9 +10,7 @@ import {InertiaLink} from "@inertiajs/inertia-react";
 
 
 const RecipeApiDetails = ({recipe, auth, message}) => {
-    // const [message, setMessage] = useState('');
 
-    // const [isLoading, setIsLoading] = useState(true);
 
     const formatRecipeForSaving = () => {
         return {
@@ -47,7 +45,7 @@ const RecipeApiDetails = ({recipe, auth, message}) => {
         formData.append('source', formattedRecipe.source);
         formData.append('id_from_api', formattedRecipe.id_from_api);
 
-        // Dodaj obraz, jeśli istnieje
+
         if (formattedRecipe.image) {
             formData.append('image', formattedRecipe.image);
         }
@@ -61,19 +59,11 @@ const RecipeApiDetails = ({recipe, auth, message}) => {
             }
         });
     };
-
-
-
     const cleanInstructions = DOMPurify.sanitize(recipe.instructions);
+
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="Recipe"/>
-            {/*{isLoading ? (*/}
-            {/*    <SpinnerContainer>*/}
-
-            {/*        <Spinner>Loading...</Spinner>*/}
-            {/*    </SpinnerContainer>*/}
-            {/*) : (*/}
                 <DetailWrapper className='max-w-7xl mx-auto sm:px-6 lg:px-8'>
 
                     <div>
@@ -83,20 +73,9 @@ const RecipeApiDetails = ({recipe, auth, message}) => {
                                 {message}
                             </div>
                         )}
-
-                    {/*<Link className=' text-white m-4 bg-green-500 py-2 px-6 rounded'*/}
-                    {/*      as='button'*/}
-                    {/*      // href={route('recipes.destroy', recipe.id)}*/}
-                    {/*      method="delete">Save</Link>*/}
-
                         <button onClick={handleSaveRecipe} className='text-white m-4 bg-green-500 py-2 px-6 rounded'>
-                            Save Recipe to Database
+                          Zapisz jako moj przepis
                         </button>
-                        {/*{message && <p>{message}</p>}*/}
-                    {/*<Link className=' text-white m-4 bg-yellow-500 py-2 px-6 rounded'*/}
-                    {/*      as='button'*/}
-                    {/*      // href={route('recipes.destroy', recipe.id)}*/}
-                    {/*      method="delete">Like</Link>*/}
                     </div>
                     <div>
                         <h2>{recipe.title}</h2>
@@ -107,24 +86,12 @@ const RecipeApiDetails = ({recipe, auth, message}) => {
                     <Info>
                         <p dangerouslySetInnerHTML={{__html: cleanInstructions}}/>
                         <ul>
-                            {/*{recipe.extendedIngredients.map((ingredient, index) => (*/}
-                            {/*    // <li key={ingredient.id + '_' + index}>{ingredient.originalName}  {ingredient.measures.metric.amount} {  ingredient.measures.metric.unitLong === '' ? 'szt': ingredient.measures.metric.unitLong }</li>*/}
-                            {/*    <li key={ingredient.id + '_' + index}>*/}
-                            {/*        {ingredient.originalName.charAt(0).toUpperCase() + ingredient.originalName.slice(1)}*/}
-                            {/*         {ingredient.measures.metric.amount}*/}
-                            {/*        {ingredient.measures.metric.unitLong === ''*/}
-                            {/*            ? 'szt'*/}
-                            {/*            : ingredient.measures.metric.unitLong.toLowerCase()}*/}
-                            {/*    </li>*/}
-
-                            {/*))}*/}
                             <ul>
                                 {recipe.extendedIngredients.map((ingredient, index) => (
                                     <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient} source={'spoon'} />
                                 ))}
                             </ul>
                         </ul>
-                        {/* Wyświetl inne szczegóły przepisu */}
                     </Info>
                 </DetailWrapper>)
         {/*}*/}

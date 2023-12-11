@@ -1,5 +1,5 @@
 // import React from 'react';
-import {Head} from "@inertiajs/react";
+import {Head, usePage} from "@inertiajs/react";
 import styled from "styled-components";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import DOMPurify from 'dompurify';
@@ -7,52 +7,65 @@ import React, {useState, useEffect} from 'react';
 import {Link} from "@inertiajs/react";
 import {InertiaLink} from "@inertiajs/inertia-react";
 import IngredientListItem from "@/Components/Recipes/IngredientListItem.jsx";
+import {Inertia} from "@inertiajs/inertia";
 
 
 const RecipeApiDetails = ({recipe, auth}) => {
+    const { flash } = usePage().props;
+    console.log(flash)
     console.log(recipe)
     const ingredients = JSON.parse(recipe.ingredients);
     const cleanInstructions = DOMPurify.sanitize(recipe.instructions);
+    const saveRecipeAsUser = () => {
+        Inertia.post(route('recipes.storeUserRecipe'), {recipeId: recipe.id});
 
+    };
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="Recipe"/>
+            {flash?.success && <div className="alert alert-success">{flash.success}</div>}
+            {flash?.error && <div className="alert alert-danger">{flash.error}</div>}
 
-                <DetailWrapper className='max-w-7xl mx-auto sm:px-6 lg:px-8'>
+            <DetailWrapper className='max-w-7xl mx-auto sm:px-6 lg:px-8'>
+                <div>
+
+                    <InertiaLink className='text-white m-4 bg-blue-600 py-2 px-6 rounded' as='button'
+                                 href="/recipes">Back</InertiaLink>
+                </div>
+                {(recipe.user_id === auth.user.id || auth.user.role_id === 4) ?
                     <div>
+                        <Link className=' text-white m-4 bg-red-600 py-2 px-6 rounded'
+                              as='button'
+                              href={route('recipes.destroy', recipe.id)}
+                              method="delete">Delete</Link>
 
-                        <InertiaLink className='text-white m-4 bg-blue-600 py-2 px-6 rounded' as='button' href="/recipes">Back</InertiaLink>
-                    </div>
-                    {recipe.user_id === auth.user.id &&
-                        <div>
-                            <Link className=' text-white m-4 bg-red-600 py-2 px-6 rounded'
-                                  as='button'
-                                  href={route('recipes.destroy', recipe.id)}
-                                  method="delete">Delete</Link>
+                        <Link className=' text-white m-4 bg-blue-300 py-2 px-6 rounded'
+                              as='button'
+                              href={route('recipes.edit', recipe.id)}
 
-                            <Link className=' text-white m-4 bg-blue-300 py-2 px-6 rounded'
-                                  as='button'
-                                href={route('recipes.edit', recipe.id)}
-                                  // method="update"
-                            >Update</Link>
-                        </div>
-                    }
-                    <div>
-                        <h2>{recipe.title}</h2>
-                        <img src={recipe.image} alt={recipe.title}/>
-                        <p>porcji: {recipe.servings}</p>
-                        <p>gotowe w: {recipe.ready_in_minutes} minut</p>
+                        >Update</Link>
                     </div>
-                    <Info>
-                        <p dangerouslySetInnerHTML={{__html: cleanInstructions}}/>
-                        <ul>
-                            {ingredients.map((ingredient, index) => (
-                                // <li key={ingredient.name + '_' + index}>{ingredient.name} {ingredient.quantity} {ingredient.unit}</li>
-                                <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient} source={'user'} />
-                            ))}
-                        </ul>
-                    </Info>
-                </DetailWrapper>)
+                    : <div>
+                        <button className=' text-white m-4 bg-green-300 py-2 px-6 rounded' onClick={saveRecipeAsUser}>Zapisz jako mój przepis</button>
+                    </div>
+                }
+                <div>
+                    <h2>{recipe.title}</h2>
+                    <img src={recipe.image} alt={recipe.title}/>
+                    <p>porcji: {recipe.servings}</p>
+                    <p>gotowe w: {recipe.ready_in_minutes} minut</p>
+                </div>
+                <Info>
+                    <p dangerouslySetInnerHTML={{__html: cleanInstructions}}/>
+                    <ul>
+                        {ingredients.map((ingredient, index) => (
+                            // <li key={ingredient.name + '_' + index}>{ingredient.name} {ingredient.quantity} {ingredient.unit}</li>
+                            <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient}
+                                                source={'user'}/>
+                        ))}
+                    </ul>
+                </Info>
+            </DetailWrapper>)
         </AuthenticatedLayout>
     );
 };

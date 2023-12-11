@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Recipe;
+use App\Repositories\RecipeRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,155 +14,153 @@ use Illuminate\Support\Facades\Cache;
 class RecipeService
 {
 
-
+    private $recipeRepository;
     private $translationService;
     private $recipeApiService;
+    private $imageService;
 
-    public function __construct(TranslationService $translationService, RecipeApiService $recipeApiService)
+    public function __construct(
+        TranslationService $translationService,
+        RecipeApiService   $recipeApiService,
+        RecipeRepository   $recipeRepository,
+        ImageService       $imageService)
     {
+        $this->recipeRepository = $recipeRepository;
         $this->translationService = $translationService;
         $this->recipeApiService = $recipeApiService;
+        $this->imageService = $imageService;
     }
 
     /**
      * @return Collection
      */
-    public function getAllRecipes(): Collection
+    public function getAllRecipes()
     {
-        return Recipe::all();
+        return $this->recipeRepository->getAllRecipes();
     }
 
-    public function storeRecipe(Request $request)
+    public function getPaginatedRecipes($perPage = 10)
     {
+        return $this->recipeRepository->getPaginatedRecipes();
+    }
+
+
+    public function getUserRecipes($userId, $perPage = 10)
+    {
+        return $this->recipeRepository->getUserRecipes($userId, $perPage);
+    }
+
+
+    public function storeRecipe(Request $request): array
+    {
+
         $rules = $this->getValidationRules($request);
+        $validatedData = $request->validate($rules);
 
-        try {
-            $validatedData = $request->validate($rules);
-            $recipe = $this->createRecipe($validatedData, $request);
-
-            return ['status' => 'success', 'recipe' => $recipe, 'message' => 'Przepis został pomyślnie zapisany.'];
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Zwróć błędy walidacji
-            return ['status' => 'validation_error', 'errors' => $e->errors()];
-
+        // Obsługa logiki biznesowej
+        if ($request->hasFile('image')) {
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('images/recipes'), $imageName);
+            $validatedData['image'] = '/images/recipes/' . $imageName;
         }
+        // Dodanie ID użytkownika
+        $validatedData['user_id'] = Auth::id();
+        // Wywołanie repozytorium do zapisania przepisu
+        $recipe = $this->recipeRepository->createRecipe($validatedData);
+
+        return ['status' => 'success', 'recipe' => $recipe, 'message' => 'Przepis został pomyślnie zapisany.'];
     }
 
 
-    public function updateRecipe(Recipe $recipe, Request $request)
+    public function storeUserRecipe($recipeId, $userId): \Illuminate\Http\JsonResponse|Recipe
     {
-//        Log::info('Aktualizacja przepisu w serwisie:', ['request' => $request->all(), 'recipeId' => $recipe->id]);
-        $oldImagePath = $recipe->image ? public_path() . $recipe->image : null;
+        $originalRecipe = $this->recipeRepository->findById($recipeId);
+
+        if ($this->recipeRepository->existsForUser($userId, $originalRecipe->id_from_api)) {
+            return response()->json(['message' => 'Posiadasz już ten przepis.'], 409);
+        }
+
+        $userRecipe = $originalRecipe->replicate();
+        $userRecipe->user_id = $userId;
+
+        if ($this->imageService->isLocalImage($originalRecipe->image)) {
+            $newImagePath = $this->imageService->copyImage($originalRecipe->image);
+            $userRecipe->image = $newImagePath;
+        } else {
+            $userRecipe->image = $originalRecipe->image; // Przypadek dla zewnętrznego URL
+        }
+
+        $this->recipeRepository->save($userRecipe);
+
+        return $userRecipe;
+    }
+
+
+    public function updateRecipe(Recipe $recipe, Request $request): array
+    {
         if ($recipe->user_id !== Auth::id()) {
             return ['status' => 'error', 'message' => 'Nie masz uprawnień do edycji tego przepisu.'];
         }
-        // Zasady walidacji
-        $rules = [
-            'title' => 'required|max:250',
-            'ingredients' => 'required|json',
-            'instructions' => 'required|string',
-            'ready_in_minutes' => 'nullable|integer',
-            'servings' => 'nullable|integer',
-            'image' => $request->hasFile('image') ? 'image|max:2048' : '',
-        ];
 
+        // Walidacja
+        $rules = $this->getValidationRulesForUpdate($request);
         $validatedData = $request->validate($rules);
 
-//        // Aktualizacja przepisu
-        $recipe->fill($validatedData);
+        // Obsługa obrazka
+        $oldImagePath = $recipe->image ? public_path() . $recipe->image : null;
+        $this->imageService->updateImage($request, $validatedData, $oldImagePath);
 
-        if ($request->hasFile('image')) {
+        // Aktualizacja przepisu
+        $updatedRecipe = $this->recipeRepository->update($recipe, $validatedData);
 
-            if ($recipe->image) {
-//                Log::info('Ścieżka do starego obrazka:', ['oldImagePath' => $oldImagePath]);
-                if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
-                }
-            }
-
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images/recipes'), $imageName);
-            $recipe->image = '/images/recipes/' . $imageName;
-            Log::info('Ścieżka do starego obrazka:', ['newImagePath' => $recipe->image]);
-        }
-        $recipe->save();
-
-        return ['status' => 'success', 'recipe' => $recipe, 'message' => 'Przepis został pomyślnie zaktualizowany.'];
+        return ['status' => 'success', 'recipe' => $updatedRecipe, 'message' => 'Przepis został pomyślnie zaktualizowany.'];
     }
 
-    public function deleteRecipe(Recipe $recipe)
+    public function deleteRecipe(Recipe $recipe): void
     {
-        if ($recipe->image) {
-            $imagePath = public_path() . $recipe->image;
-            if (file_exists($imagePath)) {
-                unlink($imagePath); // Usunięcie obrazu z dysku
-            }
-        }
-        $recipe->delete();
-
+        $this->imageService->deleteImage($recipe->image);
+        $this->recipeRepository->delete($recipe);
     }
 
-    protected function getValidationRules(Request $request)
+
+//    public function cacheApiRecipes(string $cacheKey)
+//    {
+//
+//        return Cache::remember($cacheKey, now()->addMinutes(30), function () {
+//            $recipesFromApi = $this->recipeApiService->fetchRecipes();
+//
+//            return $this->translateRecipes($recipesFromApi);
+//        });
+//    }
+//    public function cacheApiRecipes(string $cacheKey)
+//    {
+//        return Cache::remember($cacheKey, now()->addMinutes(30), function () {
+//            $response = $this->recipeApiService->fetchRecipes();
+//
+//            if ($response['success']) {
+//                return $this->translateRecipes($response['data']);
+//            } else {
+//                // Przekazanie błędu, jeśli wystąpił
+//                return ['success' => false, 'error' => $response['error']];
+//            }
+//        });
+//    }
+
+    public function cacheApiRecipes(string $cacheKey): array
     {
-        $rules = [
-            'title' => 'required|max:250',
-            'ingredients' => 'required|json',
-            'instructions' => 'required|string',
-            'ready_in_minutes' => 'nullable|integer',
-            'servings' => 'nullable|integer',
-            'source' => 'required|in:spoon,user',
-            'id_from_api' => [
-                'nullable',
-                'integer',
-                Rule::unique('recipes')->where(function ($query) use ($request) {
-                    return $query->where('user_id', Auth::id());
-                })
-            ],
-        ];
-
-        if ($request->input('source') === 'user') {
-            $rules['image'] = 'nullable|image|max:2048';
-        } elseif ($request->input('source') === 'spoon') {
-            $rules['image'] = 'nullable|string';
-        }
-
-        return $rules;
-    }
-
-    protected function recipeExists($validatedData)
-    {
-        return Recipe::where('id_from_api', $validatedData['id_from_api'])
-            ->where('user_id', Auth::id())
-            ->exists();
-    }
-
-    protected function createRecipe($validatedData, $request)
-    {
-        $recipe = new Recipe($validatedData);
-        $recipe->user_id = Auth::id();
-        if ($validatedData['source'] === 'spoon') {
-            $recipe->id_from_api = $validatedData['id_from_api']; // Dodaj pole id_from_api do obiektu Recipe
-        }
-        if ($request->hasFile('image')) {
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images/recipes'), $imageName);
-            $recipe->image = '/images/recipes/' . $imageName;
-        }
-
-        $recipe->save();
-        return $recipe;
-    }
-
-    // Dodatkowe metody do zarządzania przepisami z zewnętrznego API, tłumaczenia itp.
-
-    public function cacheApiRecipes(string $cacheKey)
-    {
-
         return Cache::remember($cacheKey, now()->addMinutes(30), function () {
-            $recipesFromApi = $this->recipeApiService->fetchRecipes();
+            $response = $this->recipeApiService->fetchRecipes();
 
-            return $this->translateRecipes($recipesFromApi);
+            if (!isset($response['success'])) {
+                // Jeśli klucz 'success' nie istnieje, uznajemy to za błąd
+                return ['success' => false, 'error' => 'Błąd odpowiedzi API'];
+            }
+
+            if ($response['success']) {
+                return $this->translateRecipes($response['data']);
+            } else {
+                return ['success' => false, 'error' => $response['error']];
+            }
         });
     }
 
@@ -206,8 +205,6 @@ class RecipeService
     }
 
 
-
-    // Metody tłumaczenia przeniesione z RecipeController
     public function translateRecipeFields(array $recipe, array $translationMap): array
     {
         foreach ($translationMap as $field => $method) {
@@ -250,16 +247,62 @@ class RecipeService
         return $item;
     }
 
+//    public function handleRecipeSearch(string $term, string $cacheKey)
+//    {
+//        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($term) {
+//            try {
+//
+//                $searchTerm = $this->translationService->translateOne($term ,'en');
+//                $searchResults = $this->recipeApiService->searchRecipes($searchTerm);
+////                $searchResults = $this->recipeApiService->searchRecipes($term);
+//                foreach ($searchResults as $key => $recipe) {
+//                    $searchResults[$key] = $this->translateRecipeFields($recipe, ['title' => 'translateOne']);
+//                }
+//                return $searchResults;
+//            } catch (Exception $e) {
+//                // Obsługa wyjątku
+//                return [];
+//            }
+//        });
+//    }
+
+    public function extractAndTranslateQuery($term): array
+    {
+        $original = '';
+        $translated = '';
+
+        $start = strpos($term, 'query=');
+        if ($start !== false) {
+            $start += strlen('query=');
+            $end = strpos($term, '&', $start);
+            $original = $end !== false ? substr($term, $start, $end - $start) : substr($term, $start);
+
+            if (!empty($original)) {
+                $translated = $this->translationService->translateOne($original, 'en');
+            }
+        }
+
+        return ['original' => $original, 'translated' => $translated];
+    }
+
     public function handleRecipeSearch(string $term, string $cacheKey)
     {
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($term) {
             try {
-                $searchTerm = $this->translationService->translateOne($term, 'en');
-                $searchResults = $this->recipeApiService->searchRecipes($searchTerm);
+                $queryParts = $this->extractAndTranslateQuery($term);
+                $originalQuery = $queryParts['original'];
+                $translatedQuery = $queryParts['translated'];
+
+                if (!empty($originalQuery) && !empty($translatedQuery)) {
+                    $term = str_replace('query=' . $originalQuery, 'query=' . $translatedQuery, $term);
+                }
+
+                $searchResults = $this->recipeApiService->searchRecipes($term);
                 foreach ($searchResults as $key => $recipe) {
                     $searchResults[$key] = $this->translateRecipeFields($recipe, ['title' => 'translateOne']);
                 }
                 return $searchResults;
+
             } catch (Exception $e) {
                 // Obsługa wyjątku
                 return [];
@@ -272,4 +315,186 @@ class RecipeService
         return Cache::get($cacheKey, []);
     }
 
+
+    protected function getValidationRules(Request $request): array
+    {
+        $rules = [
+            'title' => 'required|max:250',
+            'ingredients' => 'required|json',
+            'instructions' => 'required|string',
+            'ready_in_minutes' => 'nullable|integer',
+            'servings' => 'nullable|integer',
+            'source' => 'required|in:spoon,user',
+            'id_from_api' => [
+                'nullable',
+                'integer',
+                Rule::unique('recipes')->where(function ($query) use ($request) {
+                    return $query->where('user_id', Auth::id());
+                })
+            ],
+        ];
+
+        if ($request->input('source') === 'user') {
+            $rules['image'] = 'nullable|image|max:2048';
+        } elseif ($request->input('source') === 'spoon') {
+            $rules['image'] = 'nullable|string';
+        }
+
+        return $rules;
+    }
+
+    protected function getValidationRulesForUpdate(Request $request): array
+    {
+        return [
+            'title' => 'sometimes|required|max:250',
+            'ingredients' => 'sometimes|required|json',
+            'instructions' => 'sometimes|required|string',
+            'ready_in_minutes' => 'nullable|integer',
+            'servings' => 'nullable|integer',
+            'image' => $request->hasFile('image') ? 'image|max:2048' : 'nullable|string',
+        ];
+    }
+
+
 }
+
+//    public function storeUserRecipe($recipeId, $userId)
+//    {
+//        $originalRecipe = Recipe::findOrFail($recipeId);
+//        if (Recipe::where('user_id', $userId)->where('id_from_api', $originalRecipe->id_from_api)->exists()) {
+//            // Obsługa sytuacji, gdy przepis już istnieje
+//            return response()->json(['message' => 'Posiadasz już ten przepis.'], 409); // Przykładowy komunikat błędu
+//        }
+//        $userRecipe = $originalRecipe->replicate();
+//        $userRecipe->user_id = $userId;
+//        $userRecipe->save();
+//
+//        return $userRecipe;
+//    }
+
+
+//    public function storeUserRecipe($recipeId, $userId)
+//    {
+//        $originalRecipe = Recipe::findOrFail($recipeId);
+//
+//        if (Recipe::where('user_id', $userId)->where('id_from_api', $originalRecipe->id_from_api)->exists()) {
+//            return response()->json(['message' => 'Posiadasz już ten przepis.'], 409);
+//        }
+//
+//        $userRecipe = $originalRecipe->replicate();
+//        $userRecipe->user_id = $userId;
+//
+//        if ($this->isLocalImage($originalRecipe->image)) {
+//            $newImagePath = $this->copyImage($originalRecipe->image);
+//            $userRecipe->image = $newImagePath;
+//        } else {
+//            // Jeśli to zewnętrzny URL, po prostu przypisz ten sam URL
+//            $userRecipe->image = $originalRecipe->image;
+//        }
+//
+//        $userRecipe->save();
+//
+//        return $userRecipe;
+//    }
+
+
+//    public function storeRecipe(Request $request)
+//    {
+//        $rules = $this->getValidationRules($request);
+//
+//        try {
+//            $validatedData = $request->validate($rules);
+//            $recipe = $this->createRecipe($validatedData, $request);
+//
+//            return ['status' => 'success', 'recipe' => $recipe, 'message' => 'Przepis został pomyślnie zapisany.'];
+//
+//        } catch (\Illuminate\Validation\ValidationException $e) {
+//            // Zwróć błędy walidacji
+//            return ['status' => 'validation_error', 'errors' => $e->errors()];
+//
+//        }
+//    }
+
+
+//    protected function createRecipe($validatedData, $request)
+//    {
+//        $recipe = new Recipe($validatedData);
+//        $recipe->user_id = Auth::id();
+//        if ($validatedData['source'] === 'spoon') {
+//            $recipe->id_from_api = $validatedData['id_from_api']; // Dodaj pole id_from_api do obiektu Recipe
+//        }
+//        if ($request->hasFile('image')) {
+//            $imageName = time() . '.' . $request->image->extension();
+//            $request->image->move(public_path('images/recipes'), $imageName);
+//            $recipe->image = '/images/recipes/' . $imageName;
+//        }
+//
+//        $recipe->save();
+//        return $recipe;
+//    }
+
+
+
+//    protected function recipeExists($validatedData)
+//    {
+//        return Recipe::where('id_from_api', $validatedData['id_from_api'])
+//            ->where('user_id', Auth::id())
+//            ->exists();
+//    }
+
+
+//    public function updateRecipe(Recipe $recipe, Request $request): array
+//    {
+//
+//        $oldImagePath = $recipe->image ? public_path() . $recipe->image : null;
+//        if ($recipe->user_id !== Auth::id()) {
+//            return ['status' => 'error', 'message' => 'Nie masz uprawnień do edycji tego przepisu.'];
+//        }
+//        // Zasady walidacji
+//        $rules = [
+//            'title' => 'required|max:250',
+//            'ingredients' => 'required|json',
+//            'instructions' => 'required|string',
+//            'ready_in_minutes' => 'nullable|integer',
+//            'servings' => 'nullable|integer',
+//            'image' => $request->hasFile('image') ? 'image|max:2048' : '',
+//        ];
+//
+//        $validatedData = $request->validate($rules);
+//
+////        // Aktualizacja przepisu
+//        $recipe->fill($validatedData);
+//
+//        if ($request->hasFile('image')) {
+//
+//            if ($recipe->image) {
+////                Log::info('Ścieżka do starego obrazka:', ['oldImagePath' => $oldImagePath]);
+//                if (file_exists($oldImagePath)) {
+//                    unlink($oldImagePath);
+//                }
+//            }
+//
+//            $imageName = time() . '.' . $request->image->extension();
+//            $request->image->move(public_path('images/recipes'), $imageName);
+//            $recipe->image = '/images/recipes/' . $imageName;
+//            Log::info('Ścieżka do starego obrazka:', ['newImagePath' => $recipe->image]);
+//        }
+//        $recipe->save();
+//
+//        return ['status' => 'success', 'recipe' => $recipe, 'message' => 'Przepis został pomyślnie zaktualizowany.'];
+//    }
+
+
+//    public function deleteRecipe(Recipe $recipe)
+//    {
+//        if ($recipe->image) {
+//            $imagePath = public_path() . $recipe->image;
+//            if (file_exists($imagePath)) {
+//                unlink($imagePath); // Usunięcie obrazu z dysku
+//            }
+//        }
+//        $recipe->delete();
+//
+//    }
+
+//}

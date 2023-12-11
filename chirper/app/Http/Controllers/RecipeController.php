@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Recipe;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -24,11 +25,8 @@ class RecipeController extends Controller
     /**
      * @param RecipeService $recipeService
      */
-    public function __construct(
-        RecipeService $recipeService
-    )
+    public function __construct(RecipeService $recipeService)
     {
-
         $this->recipeService = $recipeService;
     }
 
@@ -38,16 +36,37 @@ class RecipeController extends Controller
      */
 
 
+//    public function index(): Response
+//    {
+//        return Inertia::render('Recipe/Index', [
+//            'recipes' => $this->recipeService->getAllRecipes(),
+//            'apiRecipes' => $this->recipeService->cacheApiRecipes('apiRecipes'),
+//            'message' => session('message')
+//
+//        ]);
+//
+//    }
     public function index(): Response
     {
+        $apiRecipesResponse = $this->recipeService->cacheApiRecipes('apiRecipes');
+
+        if (isset($apiRecipesResponse['success']) && !$apiRecipesResponse['success']) {
+            return Inertia::render('Recipe/Index', [
+                'recipes' => $this->recipeService->getAllRecipes(),
+                'apiRecipes' => [],
+                'error' => $apiRecipesResponse['error'],
+                'message' => session('message')
+            ]);
+        }
+
         return Inertia::render('Recipe/Index', [
             'recipes' => $this->recipeService->getAllRecipes(),
-            'apiRecipes' => $this->recipeService->cacheApiRecipes('apiRecipes'),
+            'apiRecipes' => $apiRecipesResponse,
             'message' => session('message')
-
         ]);
-
     }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -65,12 +84,12 @@ class RecipeController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $result = $this->recipeService->storeRecipe($request);
-
         if ($result['status'] === 'validation_error') {
 
             return redirect()->back()->with('message', 'Ten przepis już istnieje w Twojej kolekcji.');
         }
-        return redirect()->back()->with('message', 'Przepis został pomyślnie zapisany.');
+        return redirect()->route('recipes.show', ['recipe' => $result['recipe']->id])
+            ->with('message', 'Przepis został pomyślnie zapisany.');
     }
 
 
@@ -110,6 +129,7 @@ class RecipeController extends Controller
      */
     public function update(Request $request, Recipe $recipe): RedirectResponse
     {
+        $this->authorize('update', $recipe);
         $result = $this->recipeService->updateRecipe($recipe, $request);
 
         if ($result['status'] === 'validation_error') {
@@ -123,11 +143,20 @@ class RecipeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+
     public function destroy(Recipe $recipe): RedirectResponse
     {
-        $this->recipeService->deleteRecipe($recipe);
-        return redirect()->route('recipes.index');
+        $this->authorize('delete', $recipe);
+
+        try {
+            $this->recipeService->deleteRecipe($recipe);
+            return redirect()->route('recipes.index')->with('success', 'Przepis został usunięty.');
+        } catch (\Exception $e) {
+            // Logowanie błędu lub inna obsługa wyjątku
+            return redirect()->back()->with('error', 'Wystąpił błąd podczas usuwania przepisu.');
+        }
     }
+
 
 
     /**
@@ -136,7 +165,10 @@ class RecipeController extends Controller
      */
     public function handleSearch(Request $request): RedirectResponse
     {
-        $termFromSearch = strtolower($request->input('term'));
+
+//        $termFromSearch = strtolower($request->input('term'));
+        $termFromSearch = urldecode($request->input('term'));
+
         $cacheKey = 'search_results_' . $termFromSearch;
         $this->recipeService->handleRecipeSearch($termFromSearch, $cacheKey);
         return redirect()->route('searched.recipes', ['cacheKey' => $cacheKey]);
@@ -153,4 +185,80 @@ class RecipeController extends Controller
     }
 
 
+
+    public function storeUserRecipe(Request $request): RedirectResponse
+    {
+        $recipeId = $request->input('recipeId');
+        $response = $this->recipeService->storeUserRecipe($recipeId, Auth::id());
+
+        // Sprawdzenie, czy odpowiedź jest instancją JsonResponse (co oznacza błąd)
+        if ($response instanceof \Illuminate\Http\JsonResponse) {
+            // Przekierowanie z powrotem na stronę oryginalnego przepisu z komunikatem błędu
+            return redirect()->route('recipes.show', $recipeId)
+                ->with('error', $response->getData()->message);
+        }
+
+        // W przypadku sukcesu przekieruj na stronę nowego przepisu
+        return redirect()->route('recipes.show', $response->id)
+            ->with('success', 'Przepis został pomyślnie zapisany');
+    }
+
+
 }
+
+//    public function storeUserRecipe(Request $request)
+//    {
+//        $recipeId = $request->input('recipeId');
+//        // Znajdź oryginalny przepis lub zwróć błąd 404, jeśli nie istnieje
+//        $originalRecipe = Recipe::findOrFail($recipeId);
+//
+//        // Utwórz nową instancję przepisu i skopiuj dane
+//        $userRecipe = $originalRecipe->replicate();
+//
+//        // Przypisz bieżącego użytkownika jako właściciela nowej kopii
+//        $userRecipe->user_id = Auth::id();
+//
+//        // Zapisz nową kopię przepisu w bazie danych
+//        $userRecipe->save();
+//
+//        // Zwróć odpowiedź, na przykład przekierowanie do nowo utworzonego przepisu
+//        return redirect()->route('recipes.show', $userRecipe->id);
+//    }
+//    public function storeUserRecipe(Request $request): RedirectResponse
+//    {
+//        $recipeId = $request->input('recipeId');
+//        $userRecipe = $this->recipeService->storeUserRecipe($recipeId, Auth::id());
+//
+//        return redirect()->route('recipes.show', $userRecipe->id);
+//    }
+
+
+//    public function storeUserRecipe(Request $request): RedirectResponse
+//    {
+//        $recipeId = $request->input('recipeId');
+//        $response = $this->recipeService->storeUserRecipe($recipeId, Auth::id());
+//
+////        if (isset($response['status']) && $response['status'] === 'error') {
+//        $data= $response->getData();
+//        if (isset($data->status) && $data->status === 'error') {
+//            // Przekierowanie z powrotem na stronę oryginalnego przepisu z komunikatem błędu
+//            return redirect()->route('recipes.show', $recipeId)
+//                ->with('error', $response['message']);
+//        }
+//
+//        // W przypadku sukcesu przekieruj na stronę nowego przepisu
+//        return redirect()->route('recipes.show', $response['recipe']->id);
+//    }
+
+//    public function showUserRecipes($userId) {
+//        $currentUser = auth()->user();
+//
+//        // Sprawdź, czy zalogowany użytkownik jest administratorem lub właścicielem przepisów
+//        if ($currentUser->id == $userId || $currentUser->isAdmin()) {
+//            $recipes = $this->recipeService->getUserRecipes($userId);
+//            return Inertia::render('UserRecipes', ['recipes' => $recipes]);
+//        } else {
+//            // Odpowiednia obsługa braku dostępu
+//            abort(403, 'Brak dostępu');
+//        }
+//    }
