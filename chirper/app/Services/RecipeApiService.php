@@ -13,6 +13,19 @@ class RecipeApiService
         $this->apiKey = config('services.spoonacular.api_key');
     }
 
+//    public function fetchRecipes(): array
+//    {
+//        $response = Http::get("https://api.spoonacular.com/recipes/random", [
+//            'apiKey' => $this->apiKey,
+//            'number' => 8
+//        ]);
+//
+//        if ($response->successful()) {
+//            return $response->json();
+//        }
+//
+//        throw new \Exception('Nie udało się pobrać danych z API Spoonacular.' .  $response->body());
+//    }
     public function fetchRecipes(): array
     {
         $response = Http::get("https://api.spoonacular.com/recipes/random", [
@@ -21,36 +34,26 @@ class RecipeApiService
         ]);
 
         if ($response->successful()) {
-            return $response->json();
+            return ['success' => true, 'data' => $response->json()];
+        } else {
+            // Zapewnienie, że klucz 'error' zawsze istnieje
+            return ['success' => false, 'error' => $response->json()['message'] ?? 'Wystąpił błąd'];
         }
 
-        throw new \Exception('Nie udało się pobrać danych z API Spoonacular.' .  $response->body());
     }
 
-//    public function fetchRecipe($id)
-//    {
-//        $response = Http::get("https://api.spoonacular.com/recipes/{$id}/information", [
-//            'apiKey' => $this->apiKey,
-//        ]);
-//        if ($response->successful()) {
-//            return $response->json();
-//        }
-//
-//        throw new \Exception('Nie udało się pobrać danych z API Spoonacular.' . $response->body());
-//    }
     public function fetchRecipe($id)
     {
         $response = Http::get("https://api.spoonacular.com/recipes/{$id}/information", [
             'apiKey' => $this->apiKey,
         ]);
-
         if ($response->successful()) {
-            return ['success' => true, 'data' => $response->json()];
-        } else {
-            // Zwróć informację o błędzie zamiast rzucać wyjątek
-            return ['success' => false, 'error' => $response->json()['message']];
+            return $response->json();
         }
+
+        throw new \Exception('Nie udało się pobrać danych z API Spoonacular.' . $response->body());
     }
+
 
     public function searchRecipes(string $query): array
     {

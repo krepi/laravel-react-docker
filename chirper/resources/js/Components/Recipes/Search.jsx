@@ -90,19 +90,6 @@ export default function Search() {
             {/*                className={`m-4 px-4 py-2 rounded ${isActive('pasta') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>*/}
             {/*            Makaron*/}
             {/*        </button>*/}
-            {/*        <button type="button" onClick={() => toggleOption('chicken')}*/}
-            {/*                className={`m-4 px-4 py-2 rounded ${isActive('chicken') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>*/}
-            {/*Kurczak*/}
-            {/*        </button>*/}
-            {/*        <button type="button" onClick={() => toggleOption('lunch')}*/}
-            {/*                className={`m-4 px-4 py-2 rounded ${isActive('lunch') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>*/}
-            {/*           lunch*/}
-            {/*        </button>*/}
-            {/*        <button type="button" onClick={() => toggleOption('pork')}*/}
-            {/*                className={`m-4 px-4 py-2 rounded ${isActive('pork') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>*/}
-            {/*           swinia*/}
-            {/*        </button>*/}
-            {/* ... więcej przycisków ... */}
 
             <input type="text" placeholder="Max Protein (g)"
                    onChange={(e) => updateParameter('maxProtein', e.target.value)}
@@ -126,12 +113,21 @@ export default function Search() {
                 className={`m-4 px-4 py-2 rounded ${isParameterActive('diet', 'gluten-free') ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
                 Gluten free
             </button>
+            {/*<button*/}
+            {/*    type="button"*/}
+            {/*    onClick={() => toggleParameterOption('cuisine', 'italian')}*/}
+            {/*    className={`m-4 px-4 py-2 rounded-full ${isParameterActive('cuisine', 'italian') ? 'active' : 'bg-gray-200'}`}>*/}
+            {/*    <FaPizzaSlice className='icon'/>Italian*/}
+            {/*</button>*/}
             <button
                 type="button"
                 onClick={() => toggleParameterOption('cuisine', 'italian')}
-                className={`m-4 px-4 py-2 rounded ${isParameterActive('cuisine', 'italian') ? 'active' : 'bg-gray-200'}`}>
-                <FaPizzaSlice className='icon'/>Italian
+                className={`m-4 w-14 h-14 rounded-full flex flex-col items-center justify-center text-sm ${isParameterActive('cuisine', 'italian') ? 'active' : 'bg-gray-400 text-white'}`}>
+                <FaPizzaSlice className='text-lg'/> {/* Zwiększ rozmiar ikony */}
+                <span>Italian</span> {/* Tekst w kontenerze span dla lepszego zarządzania stylem */}
             </button>
+
+
             {/* Przycisk wyszukiwania */}
             <button type="submit" className="px-4 py-2 rounded bg-green-500 text-white">
                 Search

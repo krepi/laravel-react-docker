@@ -132,15 +132,33 @@ class RecipeService
 //            return $this->translateRecipes($recipesFromApi);
 //        });
 //    }
-    public function cacheApiRecipes(string $cacheKey)
+//    public function cacheApiRecipes(string $cacheKey)
+//    {
+//        return Cache::remember($cacheKey, now()->addMinutes(30), function () {
+//            $response = $this->recipeApiService->fetchRecipes();
+//
+//            if ($response['success']) {
+//                return $this->translateRecipes($response['data']);
+//            } else {
+//                // Przekazanie błędu, jeśli wystąpił
+//                return ['success' => false, 'error' => $response['error']];
+//            }
+//        });
+//    }
+
+    public function cacheApiRecipes(string $cacheKey): array
     {
         return Cache::remember($cacheKey, now()->addMinutes(30), function () {
             $response = $this->recipeApiService->fetchRecipes();
 
+            if (!isset($response['success'])) {
+                // Jeśli klucz 'success' nie istnieje, uznajemy to za błąd
+                return ['success' => false, 'error' => 'Błąd odpowiedzi API'];
+            }
+
             if ($response['success']) {
                 return $this->translateRecipes($response['data']);
             } else {
-                // Przekazanie błędu, jeśli wystąpił
                 return ['success' => false, 'error' => $response['error']];
             }
         });

@@ -10,7 +10,7 @@ import Search from "@/Components/Recipes/Search.jsx";
 import UserRecipes from "@/Components/Recipes/UserRecipes.jsx";
 
 
-export default function Index({auth, recipes, apiRecipes, message }) {
+export default function Index({auth, recipes, apiRecipes, message,error }) {
 
     return (
         <AuthenticatedLayout user={auth.user}>
@@ -29,7 +29,7 @@ export default function Index({auth, recipes, apiRecipes, message }) {
                 </div>
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <Search/>
-                <ApiRecipes apiRecipes={apiRecipes}/>
+                <ApiRecipes apiRecipes={apiRecipes} error={error}/>
                 <UserRecipes recipes={recipes} auth={auth} />
                 </div>
 

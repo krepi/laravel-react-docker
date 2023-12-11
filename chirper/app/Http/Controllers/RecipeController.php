@@ -50,8 +50,7 @@ class RecipeController extends Controller
     {
         $apiRecipesResponse = $this->recipeService->cacheApiRecipes('apiRecipes');
 
-        // Jeśli wystąpił błąd podczas pobierania przepisów z API
-        if (!$apiRecipesResponse['success']) {
+        if (isset($apiRecipesResponse['success']) && !$apiRecipesResponse['success']) {
             return Inertia::render('Recipe/Index', [
                 'recipes' => $this->recipeService->getAllRecipes(),
                 'apiRecipes' => [],
@@ -60,7 +59,6 @@ class RecipeController extends Controller
             ]);
         }
 
-        // Jeśli wszystko przebiegło pomyślnie
         return Inertia::render('Recipe/Index', [
             'recipes' => $this->recipeService->getAllRecipes(),
             'apiRecipes' => $apiRecipesResponse,
