@@ -7,7 +7,8 @@ export default function Welcome({auth, laravelVersion, phpVersion}) {
         <>
             <Head title="Welcome"/>
             <div
-                className="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white">
+                className="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white"
+                >
                 <div className="sm:fixed sm:top-0 sm:right-0 p-6 text-right">
                     {auth.user ? (
                         <Link
@@ -38,24 +39,26 @@ export default function Welcome({auth, laravelVersion, phpVersion}) {
                 <div className="main w-4/5 mx-auto" style={{ height: '80vh' }}>
                     <section className='header h-1/2'>
                         <div className="main h-full mx-auto ">
-                                <div className="banner relative h-full bg-cover bg-center" style={{ backgroundImage: `url(/images/assets/meal.jpg)`  }}>
+                                <div className="banner relative h-full flex-col px-6 py-4 bg-cover bg-center" style={{ backgroundImage: `url(/images/assets/meal.jpg)`  }}>
+                                    <h1 className='text-white text-xl '>DishDock</h1>
+                                    <p>u nas znajziesz najlepsze przepisy z calego swiata</p>
                                     <button className="bg-blue-300 w-32 h-16 p-2 text-white rounded login_button absolute inset-0 m-auto">Zaloguj się</button>
                                 </div>
                         </div>
                     </section>
-                    <section className='h-1/2'>
-                        <div className="wrapper flex justify-around">
-                            <div className="card">
+                    <section className='h-[40%]'>
+                        <div className="wrapper flex justify-around h-full py-6">
+                            <div className="card h-[80%] w-[30%] bg-gray-500 rounded">
                                 <h4 className="card_title">Znajdz Przepis</h4>
                                 <img src="" alt="" className="card_img"/>
-                                <p className="card_descriprion"></p>
+                                <p className="card_descriprion">znajadz przepis w interneceie</p>
                             </div>
-                            <div className="card">
+                            <div className="card h-[80%] w-[30%]">
                                 <h4 className="card_title">Zapisz Przepis</h4>
                                 <img src="" alt="" className="card_img"/>
                                 <p className="card_descriprion"></p>
                             </div>
-                            <div className="card">
+                            <div className="card h-[80%] w-[30%]">
                                 <h4 className="card_title">Stwórz przepis</h4>
                                 <img src="" alt="" className="card_img"/>
                                 <p className="card_descriprion"></p>
