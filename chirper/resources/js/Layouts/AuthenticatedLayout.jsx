@@ -21,11 +21,11 @@ export default function Authenticated({ user, header, children }) {
                             </div>
 
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <NavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                    Dashboard
-                                </NavLink>
+                                {/*<NavLink href={route('dashboard')} active={route().current('dashboard')}>*/}
+                                {/*    Dashboard*/}
+                                {/*</NavLink>*/}
                                 <NavLink href={route('recipes.index')} active={route().current('recipes.index')}>
-                                    Recipes
+                                    Twoje Przepisy
                                 </NavLink>
                             </div>
                         </div>
@@ -106,7 +106,7 @@ export default function Authenticated({ user, header, children }) {
                     <div className="pt-4 pb-1 border-t border-gray-200">
                         <div className="px-4">
                             <div className="font-medium text-base text-gray-800">{user.name}</div>
-                            {/*<div className="font-medium text-sm text-gray-500">{user.email}</div>*/}
+                            <div className="font-medium text-sm text-gray-500">{user.email}</div>
                         </div>
 
                         <div className="mt-3 space-y-1">

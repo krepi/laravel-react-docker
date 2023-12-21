@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
+use App\Services\RecipeService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Inertia\Response;
 
-class TranslationService
+class TranslationService extends RecipeService
 {
     private $apiKey;
     private $endpoint;

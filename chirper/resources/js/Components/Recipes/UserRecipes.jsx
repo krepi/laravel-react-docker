@@ -6,11 +6,7 @@ import {InertiaLink} from "@inertiajs/inertia-react";
 
 
 export default function UserRecipes({recipes, auth}) {
-    // if( recipes){
-    // const ingredientsArray = JSON.parse(recipes[0].ingredients);
-    //
-    // console.log(ingredientsArray[0].name+ ' ' + ingredientsArray[0].quantity + ingredientsArray[0].unit); // Powinno wyświetlić "kapusta"
-    // }
+
 console.log(recipes)
 
     return (

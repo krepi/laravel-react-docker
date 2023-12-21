@@ -2,9 +2,10 @@
 
 namespace App\Services;
 
+use App\Services\RecipeService;
 use Illuminate\Support\Facades\Http;
 
-class RecipeApiService
+class RecipeApiService extends RecipeService
 {
     private $apiKey;
 
@@ -13,19 +14,7 @@ class RecipeApiService
         $this->apiKey = config('services.spoonacular.api_key');
     }
 
-//    public function fetchRecipes(): array
-//    {
-//        $response = Http::get("https://api.spoonacular.com/recipes/random", [
-//            'apiKey' => $this->apiKey,
-//            'number' => 8
-//        ]);
-//
-//        if ($response->successful()) {
-//            return $response->json();
-//        }
-//
-//        throw new \Exception('Nie udało się pobrać danych z API Spoonacular.' .  $response->body());
-//    }
+
     public function fetchRecipes(): array
     {
         $response = Http::get("https://api.spoonacular.com/recipes/random", [

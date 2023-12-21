@@ -62,94 +62,85 @@ const RecipeApiDetails = ({recipe, auth, message}) => {
     const cleanInstructions = DOMPurify.sanitize(recipe.instructions);
 
     return (
-        <AuthenticatedLayout user={auth.user}>
+        <AuthenticatedLayout user={auth.user} >
             <Head title="Recipe"/>
-                <DetailWrapper className='max-w-7xl mx-auto sm:px-6 lg:px-8'>
+            <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-4">
+                {/* Top Navigation and Messages */}
+                <div className="flex justify-between items-center p-4 bg-white rounded-lg shadow">
+                    <InertiaLink className='text-white bg-blue-600 hover:bg-blue-700 py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50' as='button' href="/recipes">Back</InertiaLink>
+                    {message && (
+                        <div className="alert alert-info text-red-600">
+                            {message}
+                        </div>
+                    )}
+                    <button onClick={handleSaveRecipe} className='text-white bg-green-500 hover:bg-green-600 py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50'>
+                        Zapisz jako mój przepis
+                    </button>
+                </div>
 
-                    <div>
-                        <InertiaLink className='text-white m-4 bg-blue-600 py-2 px-6 rounded' as='button' href="/recipes">Back</InertiaLink>
-                        {message && (
-                            <div className="alert alert-info text-red-600">
-                                {message}
-                            </div>
-                        )}
-                        <button onClick={handleSaveRecipe} className='text-white m-4 bg-green-500 py-2 px-6 rounded'>
-                          Zapisz jako moj przepis
-                        </button>
-                    </div>
-                    <div>
-                        <h2>{recipe.title}</h2>
-                        <img src={recipe.image} alt={recipe.title}/>
-                        <p>porcji: {recipe.servings}</p>
-                        <p>gotowe w: {recipe.readyInMinutes} minut</p>
-                    </div>
-                    <Info>
-                        <p dangerouslySetInnerHTML={{__html: cleanInstructions}}/>
-                        <ul>
-                            <ul>
-                                {recipe.extendedIngredients.map((ingredient, index) => (
-                                    <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient} source={'spoon'} />
-                                ))}
-                            </ul>
-                        </ul>
-                    </Info>
-                </DetailWrapper>)
-        {/*}*/}
+                {/* Recipe Details */}
+                <div className="my-8 p-4 bg-white rounded-lg shadow">
+                    <h2 className="text-2xl font-bold mb-4">{recipe.title}</h2>
+                    <img src={recipe.image} alt={recipe.title} className="rounded-lg shadow-md"/>
+                    <p className="mt-2 text-lg">Porcji: {recipe.servings}</p>
+                    <p className="text-lg">Gotowe w: {recipe.readyInMinutes} minut</p>
+                </div>
+
+                {/* Instructions */}
+                <div className="mb-8 p-4 bg-white rounded-lg shadow">
+                    <h3 className="text-xl font-semibold mb-3">Instructions:</h3>
+                    <p dangerouslySetInnerHTML={{__html: cleanInstructions}} className="text-gray-700"></p>
+                </div>
+
+                {/* Ingredients */}
+                <div className="mb-8 p-4 bg-white rounded-lg shadow">
+                    <h3 className="text-xl font-semibold mb-3">Ingredients:</h3>
+                    <ul className="list-disc list-inside">
+                        {recipe.extendedIngredients.map((ingredient, index) => (
+                            <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient} source={'spoon'} />
+                        ))}
+                    </ul>
+                </div>
+            </div>
         </AuthenticatedLayout>
+
+        // <AuthenticatedLayout user={auth.user}>
+        //     <Head title="Recipe"/>
+        //         {/*<DetailWrapper className='max-w-7xl mx-auto sm:px-6 lg:px-8'>*/}
+        //
+        //             <div>
+        //                 <InertiaLink className='text-white m-4 bg-blue-600 py-2 px-6 rounded' as='button' href="/recipes">Back</InertiaLink>
+        //                 {message && (
+        //                     <div className="alert alert-info text-red-600">
+        //                         {message}
+        //                     </div>
+        //                 )}
+        //                 <button onClick={handleSaveRecipe} className='text-white m-4 bg-green-500 py-2 px-6 rounded'>
+        //                   Zapisz jako moj przepis
+        //                 </button>
+        //             </div>
+        //             <div>
+        //                 <h2>{recipe.title}</h2>
+        //                 <img src={recipe.image} alt={recipe.title}/>
+        //                 <p>porcji: {recipe.servings}</p>
+        //                 <p>gotowe w: {recipe.readyInMinutes} minut</p>
+        //             </div>
+        //             <div>
+        //                 <p dangerouslySetInnerHTML={{__html: cleanInstructions}}/>
+        //                 <ul>
+        //                     <ul>
+        //                         {recipe.extendedIngredients.map((ingredient, index) => (
+        //                             <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient} source={'spoon'} />
+        //                         ))}
+        //                     </ul>
+        //                 </ul>
+        //             </div>
+        //         {/*</DetailWrapper>)*/}
+        // {/*}*/}
+        // </AuthenticatedLayout>
     );
 };
 
 
-const DetailWrapper = styled.div`
-    margin: 0 auto;
-    margin-top: 10rem;
-    margin-bottom: 5rem;
-    display: flex;
-    flex-direction: column;
 
-    .active {
-        background: linear-gradient(35deg, #494949, #313131);
-        color: #fff;
-    }
-
-    h2 {
-        margin-bottom: 2rem;
-    }
-
-    li {
-        font-size: 1.2rem;
-        line-height: 2.5rem;
-    }
-
-    ul {
-        margin-top: 2rem;
-    }
-`;
-const Info = styled.div`
-    margin-left: 10rem;
-`;
-const SpinnerContainer = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; // 100% wysokości widoku, aby centrować na środku ekranu
-`;
-const Spinner = styled.div`
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border-left-color: #09f;
-    animation: spin 1s ease infinite;
-
-
-    @keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-`;
 export default RecipeApiDetails;

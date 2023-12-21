@@ -17,9 +17,13 @@ class RecipeRepository
         return Recipe::paginate($perPage);
     }
 
-    public function getUserRecipes($userId, $perPage = 10): LengthAwarePaginator
+    public function getPaginatedUserRecipes($userId, $perPage = 10): LengthAwarePaginator
     {
         return Recipe::where('user_id', $userId)->paginate($perPage);
+    }
+    public function getUserRecipes($userId)
+    {
+        return Recipe::where('user_id', $userId)->get();
     }
     public function findById($id): Recipe
     {

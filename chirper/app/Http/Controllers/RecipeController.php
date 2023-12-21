@@ -60,10 +60,16 @@ class RecipeController extends Controller
         }
 
         return Inertia::render('Recipe/Index', [
-            'recipes' => $this->recipeService->getAllRecipes(),
+            'recipes' => $this->recipeService->getUserRecipes(Auth::id()),
             'apiRecipes' => $apiRecipesResponse,
             'message' => session('message')
         ]);
+//
+//        return Inertia::render('Dashboard', [
+//            'recipes' => $this->recipeService->getAllRecipes(),
+//            'apiRecipes' => $apiRecipesResponse,
+//            'message' => session('message')
+//        ]);
     }
 
 
@@ -178,9 +184,9 @@ class RecipeController extends Controller
      * @param $cacheKey
      * @return Response
      */
-    public function showSearchedRecipes($cacheKey): Response
+    public function showSearchedRecipes(string $cacheKey): Response
     {
-        $searchResults = $this->recipeService->showSearchedRecipes($cacheKey);
+        $searchResults = $this->recipeService->showSearchedRecipesFromService($cacheKey);
         return Inertia::render('Recipe/SearchedRecipes', ['searchResults' => $searchResults]);
     }
 
@@ -189,7 +195,7 @@ class RecipeController extends Controller
     public function storeUserRecipe(Request $request): RedirectResponse
     {
         $recipeId = $request->input('recipeId');
-        $response = $this->recipeService->storeUserRecipe($recipeId, Auth::id());
+        $response = $this->recipeService->storeUserRecipeServiceMethod($recipeId, Auth::id());
 
         // Sprawdzenie, czy odpowiedź jest instancją JsonResponse (co oznacza błąd)
         if ($response instanceof \Illuminate\Http\JsonResponse) {

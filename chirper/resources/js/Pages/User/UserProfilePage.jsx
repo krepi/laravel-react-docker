@@ -34,19 +34,6 @@ export default function UserProfilePage({auth, recipes, userProfile, roleName}) 
                     ))}
 
                 </Grid>
-                {/*<div className="pagination flex justify-center items-center space-x-2">*/}
-                {/*    {recipes.links.map((link, index) => (*/}
-                {/*        <InertiaLink*/}
-                {/*            key={index}*/}
-                {/*            href={link.url}*/}
-                {/*            preserveScroll*/}
-                {/*            only={['recipes']}*/}
-                {/*            className={`px-4 py-2 border rounded ${link.active ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'}`}*/}
-                {/*        >*/}
-                {/*            {link.label.replace(/&laquo;|&raquo;/g, '')} /!* Usuwa &laquo; i &raquo; *!/*/}
-                {/*        </InertiaLink>*/}
-                {/*    ))}*/}
-                {/*</div>*/}
             </div>
         </AuthenticatedLayout>
     );

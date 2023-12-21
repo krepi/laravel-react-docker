@@ -7,8 +7,9 @@ import styled from "styled-components";
 export default function ApiRecipes({apiRecipes,error}) {
     return (
         <div className="max-w-8xl mx-auto sm:px-6 lg:px-8">
-            <h2>Przepisy z API</h2>
-            <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg px-4 py-4">
+
+            <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg px-4 py-4 my-4">
+                <h2>Ostatnio modne</h2>
                 <Wrapper>
                     {error && <div className="alert alert-danger">{error}</div>}
                     <Splide options={{

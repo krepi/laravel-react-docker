@@ -26,101 +26,105 @@ const RecipeApiDetails = ({recipe, auth}) => {
             {flash?.success && <div className="alert alert-success">{flash.success}</div>}
             {flash?.error && <div className="alert alert-danger">{flash.error}</div>}
 
-            <DetailWrapper className='max-w-7xl mx-auto sm:px-6 lg:px-8'>
-                <div>
-
-                    <InertiaLink className='text-white m-4 bg-blue-600 py-2 px-6 rounded' as='button'
+            <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center p-4 bg-white rounded-lg shadow mt-4">
+                    <InertiaLink className='text-white bg-blue-600 hover:bg-blue-700 py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50'
+                                 as='button'
                                  href="/recipes">Back</InertiaLink>
-                </div>
-                {(recipe.user_id === auth.user.id || auth.user.role_id === 4) ?
-                    <div>
-                        <Link className=' text-white m-4 bg-red-600 py-2 px-6 rounded'
-                              as='button'
-                              href={route('recipes.destroy', recipe.id)}
-                              method="delete">Delete</Link>
 
-                        <Link className=' text-white m-4 bg-blue-300 py-2 px-6 rounded'
-                              as='button'
-                              href={route('recipes.edit', recipe.id)}
+                    {(recipe.user_id === auth.user.id || auth.user.role_id === 4) ? (
+                        <div className="flex space-x-4">
+                            <Link className='text-white bg-red-600 hover:bg-red-700 py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50'
+                                  as='button'
+                                  href={route('recipes.destroy', recipe.id)}
+                                  method="delete">Delete</Link>
 
-                        >Update</Link>
-                    </div>
-                    : <div>
-                        <button className=' text-white m-4 bg-green-300 py-2 px-6 rounded' onClick={saveRecipeAsUser}>Zapisz jako mój przepis</button>
-                    </div>
-                }
-                <div>
-                    <h2>{recipe.title}</h2>
-                    <img src={recipe.image} alt={recipe.title}/>
-                    <p>porcji: {recipe.servings}</p>
-                    <p>gotowe w: {recipe.ready_in_minutes} minut</p>
+                            <Link className='text-white bg-blue-300 hover:bg-blue-400 py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50'
+                                  as='button'
+                                  href={route('recipes.edit', recipe.id)}>Update</Link>
+                        </div>
+                    ) : (
+                        <button className='text-white bg-green-300 hover:bg-green-400 py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-green-300 focus:ring-opacity-50' onClick={saveRecipeAsUser}>
+                            Zapisz jako mój przepis
+                        </button>
+                    )}
                 </div>
-                <Info>
-                    <p dangerouslySetInnerHTML={{__html: cleanInstructions}}/>
-                    <ul>
+
+                <div className="my-8">
+                    <h2 className="text-2xl font-bold mb-4">{recipe.title}</h2>
+                    <img src={recipe.image} alt={recipe.title} className="rounded-lg shadow-md"/>
+                    <p className="mt-2 text-lg">Porcji: {recipe.servings}</p>
+                    <p className="text-lg">Gotowe w: {recipe.ready_in_minutes} minut</p>
+                </div>
+
+                <div className="mb-8 p-4 bg-white rounded-lg shadow">
+                    <h3 className="text-xl font-semibold mb-3">Instrukcje:</h3>
+                    <p dangerouslySetInnerHTML={{__html: cleanInstructions}} className="text-gray-700"></p>
+                </div>
+
+                {/* Sekcja składników */}
+                <div className="mb-8 p-4 bg-white rounded-lg shadow">
+                    <h3 className="text-xl font-semibold mb-3">Składniki:</h3>
+                    <ul className="list-disc list-inside">
                         {ingredients.map((ingredient, index) => (
-                            // <li key={ingredient.name + '_' + index}>{ingredient.name} {ingredient.quantity} {ingredient.unit}</li>
-                            <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient}
-                                                source={'user'}/>
+                            <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient} source={'user'}/>
                         ))}
                     </ul>
-                </Info>
-            </DetailWrapper>)
+                </div>
+            </div>
         </AuthenticatedLayout>
+
+
+        // <AuthenticatedLayout user={auth.user}>
+        //     <Head title="Recipe"/>
+        //     {flash?.success && <div className="alert alert-success">{flash.success}</div>}
+        //     {flash?.error && <div className="alert alert-danger">{flash.error}</div>}
+        //
+        //     {/*<DetailWrapper className='max-w-7xl mx-auto sm:px-6 lg:px-8'>*/}
+        //         <div>
+        //
+        //             <InertiaLink className='text-white m-4 bg-blue-600 py-2 px-6 rounded' as='button'
+        //                          href="/recipes">Back</InertiaLink>
+        //         </div>
+        //         {(recipe.user_id === auth.user.id || auth.user.role_id === 4) ?
+        //             <div>
+        //                 <Link className=' text-white m-4 bg-red-600 py-2 px-6 rounded'
+        //                       as='button'
+        //                       href={route('recipes.destroy', recipe.id)}
+        //                       method="delete">Delete</Link>
+        //
+        //                 <Link className=' text-white m-4 bg-blue-300 py-2 px-6 rounded'
+        //                       as='button'
+        //                       href={route('recipes.edit', recipe.id)}
+        //
+        //                 >Update</Link>
+        //             </div>
+        //             : <div>
+        //                 <button className=' text-white m-4 bg-green-300 py-2 px-6 rounded' onClick={saveRecipeAsUser}>Zapisz jako mój przepis</button>
+        //             </div>
+        //         }
+        //         <div>
+        //             <h2>{recipe.title}</h2>
+        //             <img src={recipe.image} alt={recipe.title}/>
+        //             <p>porcji: {recipe.servings}</p>
+        //             <p>gotowe w: {recipe.ready_in_minutes} minut</p>
+        //         </div>
+        //         <div>
+        //             <p dangerouslySetInnerHTML={{__html: cleanInstructions}}/>
+        //             <ul>
+        //                 {ingredients.map((ingredient, index) => (
+        //                     // <li key={ingredient.name + '_' + index}>{ingredient.name} {ingredient.quantity} {ingredient.unit}</li>
+        //                     <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient}
+        //                                         source={'user'}/>
+        //                 ))}
+        //             </ul>
+        //         </div>
+        //     {/*</DetailWrapper>)*/}
+        // </AuthenticatedLayout>
     );
 };
 
 
-export const DetailWrapper = styled.div`
-    margin: 0 auto;
-    margin-top: 10rem;
-    margin-bottom: 5rem;
-    display: flex;
-    flex-direction: column;
-
-    .active {
-        background: linear-gradient(35deg, #494949, #313131);
-        color: #fff;
-    }
-
-    h2 {
-        margin-bottom: 2rem;
-    }
-
-    li {
-        font-size: 1.2rem;
-        line-height: 2.5rem;
-    }
-
-    ul {
-        margin-top: 2rem;
-    }
-`;
-export const Info = styled.div`
-    margin-left: 10rem;
-`;
-const SpinnerContainer = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; // 100% wysokości widoku, aby centrować na środku ekranu
-`;
-const Spinner = styled.div`
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border-left-color: #09f;
-    animation: spin 1s ease infinite;
 
 
-    @keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-`;
 export default RecipeApiDetails;

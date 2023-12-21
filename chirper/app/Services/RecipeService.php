@@ -2,16 +2,20 @@
 
 namespace App\Services;
 
+use App\Http\Controllers\RecipeController;
 use App\Models\Recipe;
 use App\Repositories\RecipeRepository;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Cache;
+use Inertia\Inertia;
 
-class RecipeService
+class RecipeService extends RecipeController
 {
 
     private $recipeRepository;
@@ -72,14 +76,19 @@ class RecipeService
     }
 
 
-    public function storeUserRecipe($recipeId, $userId): \Illuminate\Http\JsonResponse|Recipe
+    /**
+     * @param $recipeId
+     * @param $userId
+     * @return Recipe|JsonResponse|RedirectResponse
+     */
+    public function storeUserRecipeServiceMethod($recipeId, $userId)
     {
         $originalRecipe = $this->recipeRepository->findById($recipeId);
-
-        if ($this->recipeRepository->existsForUser($userId, $originalRecipe->id_from_api)) {
-            return response()->json(['message' => 'Posiadasz już ten przepis.'], 409);
+        if ($originalRecipe->id_from_api != null) {
+            if ($this->recipeRepository->existsForUser($userId, $originalRecipe->id_from_api)) {
+                return response()->json(['message' => 'Posiadasz już ten przepis.'], 409);
+            }
         }
-
         $userRecipe = $originalRecipe->replicate();
         $userRecipe->user_id = $userId;
 
@@ -310,7 +319,7 @@ class RecipeService
         });
     }
 
-    public function showSearchedRecipes(string $cacheKey)
+    public function showSearchedRecipesFromService(string $cacheKey): array
     {
         return Cache::get($cacheKey, []);
     }
@@ -432,7 +441,6 @@ class RecipeService
 //        $recipe->save();
 //        return $recipe;
 //    }
-
 
 
 //    protected function recipeExists($validatedData)
