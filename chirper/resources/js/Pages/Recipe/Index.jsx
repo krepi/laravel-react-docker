@@ -23,14 +23,13 @@ export default function Index({auth, recipes, apiRecipes, message,error }) {
                         </div>
                     )}
 
-                    <NavLink href={route('recipes.create')} active={route().current('recipes.create')}>
-                        Create Recipes
-                    </NavLink>
+
                 </div>
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <Search/>
-                <ApiRecipes apiRecipes={apiRecipes} error={error}/>
-                <UserRecipes recipes={recipes} auth={auth} />
+                    <Search/>
+                    <ApiRecipes apiRecipes={apiRecipes} error={error}/>
+                    <ApiRecipes apiRecipes={apiRecipes} externalMessage="Początkowy komunikat"/>
+                    {/*<UserRecipes recipes={recipes} auth={auth} />*/}
                 </div>
 
             </div>

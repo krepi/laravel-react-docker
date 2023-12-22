@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import ApplicationLogo from '@/Components/common/ApplicationLogo.jsx';
 import Dropdown from '@/Components/common/Dropdown.jsx';
 import NavLink from '@/Components/common/NavLink.jsx';
@@ -25,7 +25,10 @@ export default function Authenticated({ user, header, children }) {
                                 {/*    Dashboard*/}
                                 {/*</NavLink>*/}
                                 <NavLink href={route('recipes.index')} active={route().current('recipes.index')}>
-                                    Twoje Przepisy
+                                    Szukaj Przepisów
+                                </NavLink>
+                                <NavLink href={route('recipes.create')} active={route().current('recipes.create')}>
+                                    Stwórz Przepis
                                 </NavLink>
                             </div>
                         </div>

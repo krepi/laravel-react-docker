@@ -9,8 +9,10 @@ import {Inertia} from "@inertiajs/inertia";
 import {InertiaLink} from "@inertiajs/inertia-react";
 
 
-const RecipeApiDetails = ({recipe, auth, message}) => {
-
+const RecipeApiDetails = ({recipe, auth, errors}) => {
+    // const [message, setMessage] = useState(externalMessage || '')
+    const  message = errors.id_from_api && "Juz masz ten przepis w swojej kolekcji";
+    console.log(recipe)
 
     const formatRecipeForSaving = () => {
         return {

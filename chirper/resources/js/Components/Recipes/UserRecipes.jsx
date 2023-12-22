@@ -10,10 +10,10 @@ export default function UserRecipes({recipes, auth}) {
 console.log(recipes)
 
     return (
-        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <h2>Twoje Przepisy</h2>
-            <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg px-4 py-4">
-                <Wrapper>
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            <div className="bg-white overflow-hidden shadow rounded-lg p-4">
+                <h2 className="text-2xl font-semibold">Twoje Przepisy</h2>
+                <div className="mt-8">
                     <Splide options={{
                         perPage: 3,
                         breakpoints: {
@@ -23,36 +23,73 @@ console.log(recipes)
                             640: {
                                 perPage: 1,
                             },
-
                         },
                         arrows: false,
                         pagination: true,
                         drag: 'free',
-                        gap: '5rem',
+                        gap: '20px',
                     }}>
-
                         {recipes &&
                             recipes.map(recipe => (
-
-                                <SplideSlide key={recipe.id} className='mb-4 '>
-                                    <Link className=' '
-                                          key={recipe.id}
-                                          href={route('recipes.show', recipe.id)}
-                                    >
-                                    <Card>
-                                        <p className='text-xxl'> {recipe.title}</p>
-
-                                        <img src={recipe.image || '/images/recipes/placeholder.jpg'}
-                                             alt="Recipe Image"/>
-                                        <Gradient/>
-                                    </Card>
+                                <SplideSlide key={recipe.id} className="mb-4">
+                                    <Link key={recipe.id} href={route('recipes.show', recipe.id)}>
+                                        <div className="relative h-64 rounded-xl overflow-hidden">
+                                            <img src={recipe.image || '/images/recipes/placeholder.jpg'} alt="Recipe Image" className="absolute inset-0 w-full h-full object-cover" />
+                                            <div className="absolute inset-0 bg-black opacity-50"></div>
+                                            <p className="relative z-10 text-white text-lg font-semibold text-center my-auto inset-0 flex items-center justify-center">{recipe.title}</p>
+                                        </div>
                                     </Link>
                                 </SplideSlide>
                             ))}
                     </Splide>
-                </Wrapper>
+                </div>
             </div>
         </div>
+
+        // <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        //
+        //     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg px-4 py-4">
+        //         <h2>Twoje Przepisy</h2>
+        //         <Wrapper>
+        //             <Splide options={{
+        //                 perPage: 3,
+        //                 breakpoints: {
+        //                     980: {
+        //                         perPage: 2,
+        //                     },
+        //                     640: {
+        //                         perPage: 1,
+        //                     },
+        //
+        //                 },
+        //                 arrows: false,
+        //                 pagination: true,
+        //                 drag: 'free',
+        //                 gap: '5rem',
+        //             }}>
+        //
+        //                 {recipes &&
+        //                     recipes.map(recipe => (
+        //
+        //                         <SplideSlide key={recipe.id} className='mb-4 '>
+        //                             <Link className=' '
+        //                                   key={recipe.id}
+        //                                   href={route('recipes.show', recipe.id)}
+        //                             >
+        //                             <Card>
+        //                                 <p className='text-xxl'> {recipe.title}</p>
+        //
+        //                                 <img src={recipe.image || '/images/recipes/placeholder.jpg'}
+        //                                      alt="Recipe Image"/>
+        //                                 <Gradient/>
+        //                             </Card>
+        //                             </Link>
+        //                         </SplideSlide>
+        //                     ))}
+        //             </Splide>
+        //         </Wrapper>
+        //     </div>
+        // </div>
     );
 
 

@@ -33,9 +33,12 @@ class RecipeApiService extends RecipeService
 
     public function fetchRecipe($id)
     {
-        $response = Http::get("https://api.spoonacular.com/recipes/{$id}/information", [
-            'apiKey' => $this->apiKey,
-        ]);
+//        $response = Http::get("https://api.spoonacular.com/recipes/{$id}/information?includeNutrition=true", [
+////            'includeNutrition'=>true,
+//            'apiKey' => $this->apiKey,
+//        ]);
+        $url = "https://api.spoonacular.com/recipes/{$id}/information?includeNutrition=true&apiKey=". $this->apiKey;
+        $response= Http::get($url);
         if ($response->successful()) {
             return $response->json();
         }
@@ -53,7 +56,7 @@ class RecipeApiService extends RecipeService
 //            'number' => 6
 //
 //        ]);
-        $url = "https://api.spoonacular.com/recipes/complexSearch?" . $query . "&number=8&apiKey=" . $this->apiKey;
+        $url = "https://api.spoonacular.com/recipes/complexSearch?" . $query . "&number=8&addRecipeInformation=true&addRecipeNutrition=true&apiKey=" . $this->apiKey;
 
         // Wykonanie zapytania HTTP GET
         $response = Http::get($url);

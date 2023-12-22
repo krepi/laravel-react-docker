@@ -6,6 +6,7 @@ use App\Models\Recipe;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -87,17 +88,33 @@ class RecipeController extends Controller
      */
 
 
+//    public function store(Request $request): RedirectResponse
+//    {
+//
+//        $result = $this->recipeService->storeRecipe($request);
+//
+//
+//        if ($result['status'] === 'validation_error') {
+//
+//            return redirect()->back()->with('message', 'Ten przepis już istnieje w Twojej kolekcji.');
+//        }
+//        return redirect()->route('recipes.show', ['recipe' => $result['recipe']->id])
+//            ->with('message', 'Przepis został pomyślnie zapisany.');
+//    }
+
     public function store(Request $request): RedirectResponse
     {
         $result = $this->recipeService->storeRecipe($request);
-        if ($result['status'] === 'validation_error') {
 
-            return redirect()->back()->with('message', 'Ten przepis już istnieje w Twojej kolekcji.');
+        if ($result['status'] === 'validation_error') {
+            // Przekieruj użytkownika z powrotem z komunikatami błędów
+            return redirect()->back()->withErrors($result['errors'])->withInput();
         }
+
+        // Przekieruj, jeśli sukces
         return redirect()->route('recipes.show', ['recipe' => $result['recipe']->id])
             ->with('message', 'Przepis został pomyślnie zapisany.');
     }
-
 
     /**
      * Display the specified resource.

@@ -78,7 +78,34 @@ export default function WelcomeContent({ isLoggedIn }) {
                         {/* ... (powtórz dla pozostałych członków zespołu) ... */}
                     </div>
                 </div>
-
+                <div className="my-12 mx-auto sm:px-6 lg:px-8">
+                    <h2 className="text-3xl font-semibold text-center mb-10">Skontaktuj się z nami</h2>
+                    <form className="max-w-md mx-auto bg-white rounded-lg shadow p-6">
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+                                Imię i nazwisko
+                            </label>
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" type="text" placeholder="Twoje imię i nazwisko"/>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+                                Email
+                            </label>
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" placeholder="Twój email"/>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="message">
+                                Wiadomość
+                            </label>
+                            <textarea className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="message" placeholder="Twoja wiadomość"></textarea>
+                        </div>
+                        <div className="flex items-center justify-center">
+                            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                                Wyślij
+                            </button>
+                        </div>
+                    </form>
+                </div>
                 {/* Footer Section */}
                 <div className="bg-gray-900 text-white p-6">
                     <div className="max-w-7xl mx-auto flex justify-between items-center">
