@@ -7,6 +7,7 @@ use App\Services\RecipeService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use App\Services\UserService;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -44,8 +45,9 @@ class UserController extends Controller
 //        ]);
 //    }
 
-    public function showUserProfile($userId): \Inertia\Response
+    public function showUserProfile($userId ): \Inertia\Response
     {
+
         $user = User::with(['role', 'recipes'])->findOrFail($userId);
         $this->authorize('viewProfile', $user);
 

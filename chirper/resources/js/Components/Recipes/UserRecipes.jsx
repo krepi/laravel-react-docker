@@ -3,26 +3,40 @@ import React from "react";
 import {Splide, SplideSlide} from "@splidejs/react-splide";
 import styled from "styled-components";
 import {InertiaLink} from "@inertiajs/inertia-react";
+import {LuVegan, LuWheatOff} from "react-icons/lu";
+import {FaSave} from "react-icons/fa";
 
 
 export default function UserRecipes({recipes, auth}) {
 
 console.log(recipes)
 
+
     return (
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="bg-white overflow-hidden shadow rounded-lg p-4">
-                <h2 className="text-2xl font-semibold">Twoje Przepisy</h2>
+                <h2 className="text-2xl font-semibold">Twoja osobista księga smaków</h2>
+                <p>Tutaj znajdziesz wszystkie przepisy, które zapisałeś, stworzyłeś, lub które chcesz wypróbować. Twoje przepisy to kolekcja Twoich ulubionych smaków i kulinarnych osiągnięć. Organizuj, edytuj i dziel się swoimi kulinarnymi odkryciami!</p>
                 <div className="mt-8">
                     <Splide options={{
-                        perPage: 3,
+                        perPage: 4, // Domyślna liczba slajdów na dużych ekranach
                         breakpoints: {
-                            980: {
-                                perPage: 2,
+                            1536: { // XXLarge
+                                perPage: 4, // Możesz dostosować, jeśli potrzebujesz
                             },
-                            640: {
-                                perPage: 1,
+                            1280: { // XLarge
+                                perPage: 3, // Mniej slajdów na ekranach mniejszych niż 1280px
                             },
+                            // 1024: { // Large
+                            //     perPage: 3, // Możesz dostosować, jeśli potrzebujesz
+                            // },
+                            768: { // Medium
+                                perPage: 2, // Mniej slajdów na ekranach mniejszych niż 768px
+                            },
+                            640: { // Small
+                                perPage: 1, // Jeden slajd na małych ekranach
+                            },
+                            // Dla XSmall nie trzeba dodawać, ponieważ 'perPage: 1' już to obsługuje
                         },
                         arrows: false,
                         pagination: true,
@@ -36,8 +50,13 @@ console.log(recipes)
                                         <div className="relative h-64 rounded-xl overflow-hidden">
                                             <img src={recipe.image || '/images/recipes/placeholder.jpg'} alt="Recipe Image" className="absolute inset-0 w-full h-full object-cover" />
                                             <div className="absolute inset-0 bg-black opacity-50"></div>
-                                            <p className="relative z-10 text-white text-lg font-semibold text-center my-auto inset-0 flex items-center justify-center">{recipe.title}</p>
-                                        </div>
+                                            <p className="absolute z-10 text-white text-lg font-semibold text-center w-full bottom-0 pb-4">{recipe.title}</p>
+                                            {/*<p className="relative z-10 text-white text-lg font-semibold text-center my-auto inset-0 flex items-center justify-center">{recipe.title}</p>*/}
+                                            <div className="absolute top-2 right-2 flex ">
+                                            {recipe.diets &&  recipe.diets.includes('vegan') && <LuVegan size={36} className="text-green-500" />}
+                                            {recipe.diets &&  recipe.diets.includes('gluten free') && <LuWheatOff size={36} className="text-yellow-500" />}
+                                            </div>
+                                            </div>
                                     </Link>
                                 </SplideSlide>
                             ))}
@@ -45,95 +64,5 @@ console.log(recipes)
                 </div>
             </div>
         </div>
+    )};
 
-        // <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        //
-        //     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg px-4 py-4">
-        //         <h2>Twoje Przepisy</h2>
-        //         <Wrapper>
-        //             <Splide options={{
-        //                 perPage: 3,
-        //                 breakpoints: {
-        //                     980: {
-        //                         perPage: 2,
-        //                     },
-        //                     640: {
-        //                         perPage: 1,
-        //                     },
-        //
-        //                 },
-        //                 arrows: false,
-        //                 pagination: true,
-        //                 drag: 'free',
-        //                 gap: '5rem',
-        //             }}>
-        //
-        //                 {recipes &&
-        //                     recipes.map(recipe => (
-        //
-        //                         <SplideSlide key={recipe.id} className='mb-4 '>
-        //                             <Link className=' '
-        //                                   key={recipe.id}
-        //                                   href={route('recipes.show', recipe.id)}
-        //                             >
-        //                             <Card>
-        //                                 <p className='text-xxl'> {recipe.title}</p>
-        //
-        //                                 <img src={recipe.image || '/images/recipes/placeholder.jpg'}
-        //                                      alt="Recipe Image"/>
-        //                                 <Gradient/>
-        //                             </Card>
-        //                             </Link>
-        //                         </SplideSlide>
-        //                     ))}
-        //             </Splide>
-        //         </Wrapper>
-        //     </div>
-        // </div>
-    );
-
-
-}
-const Wrapper = styled.div`
-    margin: 4rem 0rem;
-`;
-const Card = styled.div`
-    min-height: 25rem;
-    border-radius: 2rem;
-    overflow: hidden;
-    position: relative;
-
-    img {
-        border-radius: 2rem;
-        position: absolute;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    p {
-        position: absolute;
-        z-index: 10;
-        left: 50%;
-        bottom: 0%;
-        transform: translate(-50%, 0%);
-        color: #fff;
-        width: 100%;
-        text-align: center;
-        font-weight: 600;
-        font-size: 1.5rem;
-        height: 40%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-`;
-const Gradient = styled.div`
-    z-index: 3;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.5));
-
-`;

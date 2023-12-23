@@ -16,7 +16,7 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
             backgroundImage: {
-                'linear-1': 'linear-gradient(to right, #e17532, #ec3107)',
+                'color-1': '#2C2C2CFF',
                 // Możesz dodać więcej niestandardowych gradientów tutaj
             },
         },

@@ -382,6 +382,9 @@ class RecipeService extends RecipeController
                     return $query->where('user_id', Auth::id());
                 })
             ],
+
+            'nutrition' => 'nullable|json',
+            'diets' => 'nullable|json',
         ];
 
         if ($request->input('source') === 'user') {

@@ -20,6 +20,8 @@ class Recipe extends Model
         'user_id',
         'source',
         'id_from_api',
+        'nutrition',
+        'diets',
 
     ];
 

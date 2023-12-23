@@ -1,5 +1,3 @@
-
-
 import React, {useState} from 'react';
 import {Inertia} from '@inertiajs/inertia';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -10,7 +8,7 @@ export default function Create({auth}) {
 
     const [values, setValues] = useState({
         title: '',
-        ingredients: [{ name: '', quantity: '', unit: '' }],
+        ingredients: [{name: '', quantity: '', unit: ''}],
         instructions: '',
         ready_in_minutes: '',
         servings: '',
@@ -18,14 +16,14 @@ export default function Create({auth}) {
     const [image, setImage] = useState(null);
 
     const handleChange = (e) => {
-        const { name, value, dataset } = e.target;
+        const {name, value, dataset} = e.target;
         if (name.startsWith('ingredient')) {
             const index = parseInt(name.split('_')[1], 10);
             const newIngredients = [...values.ingredients];
             newIngredients[index][dataset.type] = value;
-            setValues({ ...values, ingredients: newIngredients });
+            setValues({...values, ingredients: newIngredients});
         } else {
-            setValues({ ...values, [name]: value });
+            setValues({...values, [name]: value});
         }
     };
 
@@ -83,21 +81,33 @@ export default function Create({auth}) {
             user={auth.user}
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Stwórz swój przepis</h2>}
         >
-            <Head title="Create Recipe" />
+            <Head title="Create Recipe"/>
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+
+                        <div className="p-4">
+                            <h2 className="text-2xl font-semibold">Przekształć Inspirację w Kulinarne Arcydzieło</h2>
+                            <p>Witaj w kreatywnej strefie DishDock, gdzie każdy pomysł może zamienić się w przepyszne
+                                danie. Tutaj masz przestrzeń, by dać upust swojej pasji do gotowania i podzielić się
+                                swoją unikalną recepturą. Niezależnie od tego, czy jesteś doświadczonym szefem kuchni,
+                                czy początkującym entuzjastą, Twoje przepisy mają tutaj miejsce.
+                            </p>
+                        </div>
                         <form className="p-6 flex flex-col" onSubmit={handleSubmit}>
                             <div className="mb-6 flex flex-wrap mx-2  p-4 bg-white rounded-lg shadow">
-                                <label htmlFor="title" className="block text-sm font-medium text-gray-700">Nazwa Przepisu:</label>
-                                <input name="title" value={values.title} onChange={handleChange} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm" />
+                                <label htmlFor="title" className="block text-sm font-medium text-gray-700">Nazwa
+                                    Przepisu:</label>
+                                <input name="title" value={values.title} onChange={handleChange}
+                                       className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"/>
                             </div>
 
                             {values.ingredients.map((ingredient, index) => (
                                 <div key={index} className='flex flex-wrap mx-2 mb-4 p-4 bg-white rounded-lg shadow'>
-                                {/*// <div key={index} className='flex items-center mb-4 p-4 bg-white rounded-lg shadow'>*/}
+                                    {/*// <div key={index} className='flex items-center mb-4 p-4 bg-white rounded-lg shadow'>*/}
                                     <div className='w-full md:w-1/2 px-2 mb-4 md:mb-0'>
-                                        <label htmlFor={`ingredient_${index}_name`} className="block text-sm font-medium text-gray-700">Składnik {index + 1}:</label>
+                                        <label htmlFor={`ingredient_${index}_name`}
+                                               className="block text-sm font-medium text-gray-700">Składnik {index + 1}:</label>
                                         <input
                                             name={`ingredient_${index}`}
                                             data-type="name"
@@ -107,7 +117,8 @@ export default function Create({auth}) {
                                         />
                                     </div>
                                     <div className='w-1/4 md:w-1/6 px-2 mb-4 md:mb-0'>
-                                        <label htmlFor={`ingredient_${index}_quantity`} className="block text-sm font-medium text-gray-700">Ilość:</label>
+                                        <label htmlFor={`ingredient_${index}_quantity`}
+                                               className="block text-sm font-medium text-gray-700">Ilość:</label>
                                         <input
                                             name={`ingredient_${index}`}
                                             data-type="quantity"
@@ -117,8 +128,9 @@ export default function Create({auth}) {
                                         />
                                     </div>
 
-                                    <div className='w-1/4 md:w-1/6 px-2 mb-4 md:mb-0'>
-                                        <label htmlFor={`ingredient_${index}_unit`} className="block text-sm font-medium text-gray-700">Jednostka:</label>
+                                    <div className='w-1/2 md:w-1/6 px-2 mb-4 md:mb-0'>
+                                        <label htmlFor={`ingredient_${index}_unit`}
+                                               className="block text-sm font-medium text-gray-700">Jednostka:</label>
                                         <select
                                             name={`ingredient_${index}`}
                                             data-type="unit"
@@ -127,7 +139,7 @@ export default function Create({auth}) {
                                             className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                                         >
                                             {unitOptions.map((unit) => (
-                                                <option key={unit} value={unit}>{unit}</option>
+                                                <option className="text-xl" key={unit} value={unit}>{unit}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -144,9 +156,10 @@ export default function Create({auth}) {
                             ))}
 
                             <div className="flex justify-start -mx-2 mb-4">
-                                <button className='text-white m-4 bg-green-500 hover:bg-green-600 py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50'
-                                        type="button"
-                                        onClick={handleAddIngredient}
+                                <button
+                                    className='text-white m-4 bg-green-500 hover:bg-green-600 py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50'
+                                    type="button"
+                                    onClick={handleAddIngredient}
                                 >
                                     Dodaj Składnik
                                 </button>
@@ -156,30 +169,41 @@ export default function Create({auth}) {
                             </div>
 
                             <div className='flex flex-wrap mx-2 mb-4 p-4 bg-white rounded-lg shadow'>
-                                <label htmlFor="instructions" className="block text-sm font-medium text-gray-700">Instructions:</label>
-                                <textarea name="instructions" value={values.instructions} onChange={handleChange} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm" />
+                                <label htmlFor="instructions"
+                                       className="block text-sm font-medium text-gray-700">Instructions:</label>
+                                <textarea name="instructions" value={values.instructions} onChange={handleChange}
+                                          className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"/>
                             </div>
 
                             {/*<div className="flex flex-wrap -mx-2 mb-4">*/}
                             <div className='flex flex-wrap mx-2 mb-4 p-4 bg-white rounded-lg shadow'>
-                                <div className="w-1/4 md:w-1/4 px-2 mb-4 md:mb-0">
-                                    <label htmlFor="ready_in_minutes" className="block text-sm font-medium text-gray-700">Czas minut:</label>
+                                <div className="w-1/3  md:w-1/2 px-2 mb-4 md:mb-0">
+                                    <label htmlFor="ready_in_minutes"
+                                           className="block text-sm font-medium text-gray-700">Czas minut:</label>
                                     <input name="ready_in_minutes" type="number" value={values.ready_in_minutes}
-                                           onChange={handleChange} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm" />
+                                           onChange={handleChange}
+                                           className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"/>
                                 </div>
 
-                                <div className="w-1/4 md:w-1/4 px-2">
-                                    <label htmlFor="servings" className="block text-sm font-medium text-gray-700">Porcji:</label>
-                                    <input name="servings" type="number" value={values.servings} onChange={handleChange} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm" />
+                                <div className="w-1/4 md:w-1/3 px-2">
+                                    <label htmlFor="servings"
+                                           className="block text-sm font-medium text-gray-700">Porcji:</label>
+                                    <input name="servings" type="number" value={values.servings} onChange={handleChange}
+                                           className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"/>
                                 </div>
                             </div>
 
                             <div className='flex flex-wrap mx-2 mb-4 p-4 bg-white rounded-lg shadow'>
-                                <label htmlFor="image" className="block text-sm font-medium text-gray-700">Image:</label>
-                                <input type="file" name="image" onChange={handleImageChange} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm" />
+                                <label htmlFor="image"
+                                       className="block text-sm font-medium text-gray-700">Image:</label>
+                                <input type="file" name="image" onChange={handleImageChange}
+                                       className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"/>
                             </div>
 
-                            <button className="w-3/4 mx-auto text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 py-2 px-6 rounded" type="submit">Submit</button>
+                            <button
+                                className="w-3/4 mx-auto text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 py-2 px-6 rounded"
+                                type="submit">Zapisz Przepis
+                            </button>
                         </form>
                     </div>
                 </div>

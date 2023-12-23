@@ -19,7 +19,7 @@ class RecipeApiService extends RecipeService
     {
         $response = Http::get("https://api.spoonacular.com/recipes/random", [
             'apiKey' => $this->apiKey,
-            'number' => 8
+            'number' => 12
         ]);
 
         if ($response->successful()) {
@@ -56,7 +56,7 @@ class RecipeApiService extends RecipeService
 //            'number' => 6
 //
 //        ]);
-        $url = "https://api.spoonacular.com/recipes/complexSearch?" . $query . "&number=8&addRecipeInformation=true&addRecipeNutrition=true&apiKey=" . $this->apiKey;
+        $url = "https://api.spoonacular.com/recipes/complexSearch?" . $query . "&number=12&addRecipeInformation=true&addRecipeNutrition=true&apiKey=" . $this->apiKey;
 
         // Wykonanie zapytania HTTP GET
         $response = Http::get($url);

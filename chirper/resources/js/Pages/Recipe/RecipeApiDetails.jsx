@@ -4,15 +4,16 @@ import styled from "styled-components";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import DOMPurify from 'dompurify';
 import React, {useState, useEffect} from 'react';
-import IngredientListItem from "@/Components/Recipes/IngredientListItem.jsx";
+import IngredientListItem from "@/Components/Recipes/partials/IngredientListItem.jsx";
 import {Inertia} from "@inertiajs/inertia";
-import {InertiaLink} from "@inertiajs/inertia-react";
+import BackButton from "@/Components/custom/BackButtons.jsx";
+import {DietsList, NutritionList} from "@/Components/Recipes/partials/NutritionList.jsx";
 
 
 const RecipeApiDetails = ({recipe, auth, errors}) => {
     // const [message, setMessage] = useState(externalMessage || '')
-    const  message = errors.id_from_api && "Juz masz ten przepis w swojej kolekcji";
-    console.log(recipe)
+    const message = errors.id_from_api && "Juz masz ten przepis w swojej kolekcji";
+    // console.log(recipe.nutrition)
 
     const formatRecipeForSaving = () => {
         return {
@@ -27,12 +28,14 @@ const RecipeApiDetails = ({recipe, auth, errors}) => {
             servings: recipe.servings.toString(), // Konwersja na string
             source: 'spoon',
             image: recipe.image, // URL obrazu
-            id_from_api:recipe.id
+            id_from_api: recipe.id,
+            nutrition: JSON.stringify(recipe.nutrition.nutrients),  // Formatuj jako JSON
+            diets: JSON.stringify(recipe.diets)  // Formatuj jako JSON
         };
     };
 
     const repcia = formatRecipeForSaving();
-    console.log('id from api '+ typeof(repcia.id_from_api))
+    console.log('id from api ' + typeof (repcia.id_from_api))
 
 
     const handleSaveRecipe = () => {
@@ -46,6 +49,8 @@ const RecipeApiDetails = ({recipe, auth, errors}) => {
         formData.append('servings', formattedRecipe.servings);
         formData.append('source', formattedRecipe.source);
         formData.append('id_from_api', formattedRecipe.id_from_api);
+        formData.append('nutrition', formattedRecipe.nutrition);
+        formData.append('diets', formattedRecipe.diets);
 
 
         if (formattedRecipe.image) {
@@ -64,18 +69,22 @@ const RecipeApiDetails = ({recipe, auth, errors}) => {
     const cleanInstructions = DOMPurify.sanitize(recipe.instructions);
 
     return (
-        <AuthenticatedLayout user={auth.user} >
+        <AuthenticatedLayout user={auth.user}>
             <Head title="Recipe"/>
             <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-4">
                 {/* Top Navigation and Messages */}
                 <div className="flex justify-between items-center p-4 bg-white rounded-lg shadow">
-                    <InertiaLink className='text-white bg-blue-600 hover:bg-blue-700 py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50' as='button' href="/recipes">Back</InertiaLink>
+                    {/*<InertiaLink*/}
+                    {/*    className='text-white bg-blue-600 hover:bg-blue-700 py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50'*/}
+                    {/*    as='button' href="/recipes">Back</InertiaLink>*/}
+                    <BackButton />
                     {message && (
                         <div className="alert alert-info text-red-600">
                             {message}
                         </div>
                     )}
-                    <button onClick={handleSaveRecipe} className='text-white bg-green-500 hover:bg-green-600 py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50'>
+                    <button onClick={handleSaveRecipe}
+                            className='text-white bg-green-500 hover:bg-green-600 py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50'>
                         Zapisz jako mój przepis
                     </button>
                 </div>
@@ -83,9 +92,15 @@ const RecipeApiDetails = ({recipe, auth, errors}) => {
                 {/* Recipe Details */}
                 <div className="my-8 p-4 bg-white rounded-lg shadow">
                     <h2 className="text-2xl font-bold mb-4">{recipe.title}</h2>
-                    <img src={recipe.image} alt={recipe.title} className="rounded-lg shadow-md"/>
-                    <p className="mt-2 text-lg">Porcji: {recipe.servings}</p>
-                    <p className="text-lg">Gotowe w: {recipe.readyInMinutes} minut</p>
+                    <div className="my-8 flex flex-col md:flex-row gap-4">
+                        <img src={recipe.image} alt={recipe.title} className="rounded-lg shadow-md"/>
+                        <div className="flex-1 space-y-4">
+                            {recipe.nutrition && <NutritionList nutritionData={recipe.nutrition.nutrients}/>}
+                            {recipe.diets && <DietsList dietsData={recipe.diets}/>}
+                            <p className="mt-2 text-lg">Porcji: {recipe.servings}</p>
+                            <p className="text-lg">Gotowe w: {recipe.readyInMinutes} minut</p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Instructions */}
@@ -99,7 +114,8 @@ const RecipeApiDetails = ({recipe, auth, errors}) => {
                     <h3 className="text-xl font-semibold mb-3">Ingredients:</h3>
                     <ul className="list-disc list-inside">
                         {recipe.extendedIngredients.map((ingredient, index) => (
-                            <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient} source={'spoon'} />
+                            <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient}
+                                                source={'spoon'}/>
                         ))}
                     </ul>
                 </div>
@@ -142,7 +158,6 @@ const RecipeApiDetails = ({recipe, auth, errors}) => {
         // </AuthenticatedLayout>
     );
 };
-
 
 
 export default RecipeApiDetails;

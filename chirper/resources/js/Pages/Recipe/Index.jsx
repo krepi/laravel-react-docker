@@ -28,8 +28,8 @@ export default function Index({auth, recipes, apiRecipes, message,error }) {
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <Search/>
                     <ApiRecipes apiRecipes={apiRecipes} error={error}/>
-                    <ApiRecipes apiRecipes={apiRecipes} externalMessage="Początkowy komunikat"/>
-                    {/*<UserRecipes recipes={recipes} auth={auth} />*/}
+
+                    <UserRecipes recipes={recipes} auth={auth} />
                 </div>
 
             </div>
