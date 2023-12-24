@@ -105,13 +105,13 @@ const RecipeApiDetails = ({recipe, auth, errors}) => {
 
                 {/* Instructions */}
                 <div className="mb-8 p-4 bg-white rounded-lg shadow">
-                    <h3 className="text-xl font-semibold mb-3">Instructions:</h3>
+                    <h3 className="text-xl font-semibold mb-3">Instrukcje:</h3>
                     <p dangerouslySetInnerHTML={{__html: cleanInstructions}} className="text-gray-700"></p>
                 </div>
 
                 {/* Ingredients */}
                 <div className="mb-8 p-4 bg-white rounded-lg shadow">
-                    <h3 className="text-xl font-semibold mb-3">Ingredients:</h3>
+                    <h3 className="text-xl font-semibold mb-3">Składniki:</h3>
                     <ul className="list-disc list-inside">
                         {recipe.extendedIngredients.map((ingredient, index) => (
                             <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient}
