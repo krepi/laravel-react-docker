@@ -2,16 +2,20 @@
 
 namespace App\Services;
 
+use App\Http\Controllers\RecipeController;
 use App\Models\Recipe;
 use App\Repositories\RecipeRepository;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Cache;
+use Inertia\Inertia;
 
-class RecipeService
+class RecipeService extends RecipeController
 {
 
     private $recipeRepository;
@@ -53,33 +57,47 @@ class RecipeService
 
     public function storeRecipe(Request $request): array
     {
+        try {
+            $rules = $this->getValidationRules($request);
+            $validatedData = $request->validate($rules);
 
-        $rules = $this->getValidationRules($request);
-        $validatedData = $request->validate($rules);
+            // Obsługa logiki biznesowej
+            if ($request->hasFile('image')) {
+                $imageName = time() . '.' . $request->image->extension();
+                $request->image->move(public_path('images/recipes'), $imageName);
+                $validatedData['image'] = '/images/recipes/' . $imageName;
+            }
+            // Dodanie ID użytkownika
+            $validatedData['user_id'] = Auth::id();
+            // Wywołanie repozytorium do zapisania przepisu
+            $recipe = $this->recipeRepository->createRecipe($validatedData);
 
-        // Obsługa logiki biznesowej
-        if ($request->hasFile('image')) {
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images/recipes'), $imageName);
-            $validatedData['image'] = '/images/recipes/' . $imageName;
+            return ['status' => 'success', 'recipe' => $recipe, 'message' => 'Przepis został pomyślnie zapisany.'];
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return ['status' => 'validation_error', 'errors' => $e->errors()];
         }
-        // Dodanie ID użytkownika
-        $validatedData['user_id'] = Auth::id();
-        // Wywołanie repozytorium do zapisania przepisu
-        $recipe = $this->recipeRepository->createRecipe($validatedData);
-
-        return ['status' => 'success', 'recipe' => $recipe, 'message' => 'Przepis został pomyślnie zapisany.'];
     }
 
+    public function isRecipeSaved($apiRecipeId, $userId) {
+        return Recipe::where('user_id', $userId)
+            ->where('id_from_api', $apiRecipeId)
+            ->exists();
+    }
 
-    public function storeUserRecipe($recipeId, $userId): \Illuminate\Http\JsonResponse|Recipe
+    /**
+     * @param $recipeId
+     * @param $userId
+     * @return Recipe|JsonResponse|RedirectResponse
+     */
+    public function storeUserRecipeServiceMethod($recipeId, $userId)
     {
         $originalRecipe = $this->recipeRepository->findById($recipeId);
-
-        if ($this->recipeRepository->existsForUser($userId, $originalRecipe->id_from_api)) {
-            return response()->json(['message' => 'Posiadasz już ten przepis.'], 409);
+        if ($originalRecipe->id_from_api != null) {
+            if ($this->recipeRepository->existsForUser($userId, $originalRecipe->id_from_api)) {
+                return response()->json(['message' => 'Posiadasz już ten przepis.'], 409);
+            }
         }
-
         $userRecipe = $originalRecipe->replicate();
         $userRecipe->user_id = $userId;
 
@@ -91,6 +109,7 @@ class RecipeService
         }
 
         $this->recipeRepository->save($userRecipe);
+
 
         return $userRecipe;
     }
@@ -155,7 +174,10 @@ class RecipeService
                 // Jeśli klucz 'success' nie istnieje, uznajemy to za błąd
                 return ['success' => false, 'error' => 'Błąd odpowiedzi API'];
             }
-
+            $userId = Auth::id();
+            foreach ($response['data']['recipes'] as &$apiRecipe) {
+                $apiRecipe['is_saved'] = $this->isRecipeSaved($apiRecipe['id'], $userId);
+            }
             if ($response['success']) {
                 return $this->translateRecipes($response['data']);
             } else {
@@ -285,6 +307,30 @@ class RecipeService
         return ['original' => $original, 'translated' => $translated];
     }
 
+//    public function handleRecipeSearch(string $term, string $cacheKey)
+//    {
+//        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($term) {
+//            try {
+//                $queryParts = $this->extractAndTranslateQuery($term);
+//                $originalQuery = $queryParts['original'];
+//                $translatedQuery = $queryParts['translated'];
+//
+//                if (!empty($originalQuery) && !empty($translatedQuery)) {
+//                    $term = str_replace('query=' . $originalQuery, 'query=' . $translatedQuery, $term);
+//                }
+//
+//                $searchResults = $this->recipeApiService->searchRecipes($term);
+//                foreach ($searchResults as $key => $recipe) {
+//                    $searchResults[$key] = $this->translateRecipeFields($recipe, ['title' => 'translateOne']);
+//                }
+//                return $searchResults;
+//
+//            } catch (Exception $e) {
+//                // Obsługa wyjątku
+//                return [];
+//            }
+//        });
+//    }
     public function handleRecipeSearch(string $term, string $cacheKey)
     {
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($term) {
@@ -298,9 +344,13 @@ class RecipeService
                 }
 
                 $searchResults = $this->recipeApiService->searchRecipes($term);
+                $userId = Auth::id(); // Pobierz ID bieżącego użytkownika
                 foreach ($searchResults as $key => $recipe) {
                     $searchResults[$key] = $this->translateRecipeFields($recipe, ['title' => 'translateOne']);
+                    // Dodaj informację, czy przepis jest już zapisany
+                    $searchResults[$key]['is_saved'] = $this->isRecipeSaved($recipe['id'], $userId);
                 }
+
                 return $searchResults;
 
             } catch (Exception $e) {
@@ -310,7 +360,7 @@ class RecipeService
         });
     }
 
-    public function showSearchedRecipes(string $cacheKey)
+    public function showSearchedRecipesFromService(string $cacheKey): array
     {
         return Cache::get($cacheKey, []);
     }
@@ -332,6 +382,9 @@ class RecipeService
                     return $query->where('user_id', Auth::id());
                 })
             ],
+
+            'nutrition' => 'nullable|json',
+            'diets' => 'nullable|json',
         ];
 
         if ($request->input('source') === 'user') {
@@ -432,7 +485,6 @@ class RecipeService
 //        $recipe->save();
 //        return $recipe;
 //    }
-
 
 
 //    protected function recipeExists($validatedData)

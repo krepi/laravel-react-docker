@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import ApplicationLogo from '@/Components/common/ApplicationLogo.jsx';
 import Dropdown from '@/Components/common/Dropdown.jsx';
 import NavLink from '@/Components/common/NavLink.jsx';
 import ResponsiveNavLink from '@/Components/common/ResponsiveNavLink.jsx';
+import Footer from "@/Components/Footer.jsx";
 import { Link } from '@inertiajs/react';
 
 export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-
+console.log(user.name)
     return (
-        <div className="min-h-screen bg-gray-100">
+        // <div className="min-h-screen bg-gray-100">
+        <div className="flex flex-col min-h-screen bg-gray-100">
             <nav className="bg-white border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
@@ -21,11 +23,15 @@ export default function Authenticated({ user, header, children }) {
                             </div>
 
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <NavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                    Dashboard
-                                </NavLink>
+
                                 <NavLink href={route('recipes.index')} active={route().current('recipes.index')}>
-                                    Recipes
+                                    Szukaj
+                                </NavLink>
+                                <NavLink href={route('recipes.create')} active={route().current('recipes.create')}>
+                                    Twórz
+                                </NavLink>
+                                <NavLink href={route('user.profile',user.id)} active={route().current('user.profile')}>
+                                    Twoje przepisy
                                 </NavLink>
                             </div>
                         </div>
@@ -58,9 +64,10 @@ export default function Authenticated({ user, header, children }) {
                                     </Dropdown.Trigger>
 
                                     <Dropdown.Content>
-                                        <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
+                                        { user.role_id === 4 && <Dropdown.Link href={route('admin.dashboard')}>Admin Panel</Dropdown.Link>}
+                                        <Dropdown.Link href={route('profile.edit')}>Twój Profil</Dropdown.Link>
                                         <Dropdown.Link href={route('logout')} method="post" as="button">
-                                            Log Out
+                                            Wyloguj sie
                                         </Dropdown.Link>
                                     </Dropdown.Content>
                                 </Dropdown>
@@ -95,24 +102,29 @@ export default function Authenticated({ user, header, children }) {
 
                 <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
                     <div className="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                            Dashboard
-                        </ResponsiveNavLink>
                         <ResponsiveNavLink href={route('recipes.index')} active={route().current('recipes.index')}>
-                            Recipes
+                            Szukaj
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('recipes.create')} active={route().current('recipes.create')}>
+                           Twórz
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('user.profile',user.id)} active={route().current('user.profile',user.id)}>
+                            Twoje Przepisy
+                        </ResponsiveNavLink>
+
                     </div>
 
                     <div className="pt-4 pb-1 border-t border-gray-200">
                         <div className="px-4">
                             <div className="font-medium text-base text-gray-800">{user.name}</div>
-                            {/*<div className="font-medium text-sm text-gray-500">{user.email}</div>*/}
+                            <div className="font-medium text-sm text-gray-500">{user.email}</div>
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink>
+                            { user.role_id === 4 &&  <ResponsiveNavLink href={route('admin.dashboard')}>Admin Panel</ResponsiveNavLink>}
+                            <ResponsiveNavLink href={route('profile.edit')}>Twój profil</ResponsiveNavLink>
                             <ResponsiveNavLink method="post" href={route('logout')} as="button">
-                                Log Out
+                                Wyloguj się
                             </ResponsiveNavLink>
                         </div>
                     </div>
@@ -125,7 +137,8 @@ export default function Authenticated({ user, header, children }) {
                 </header>
             )}
 
-            <main>{children}</main>
+            <main className='flex-1 '>{children}</main>
+            <Footer/>
         </div>
     );
 }

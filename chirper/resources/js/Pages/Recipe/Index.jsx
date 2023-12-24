@@ -16,21 +16,20 @@ export default function Index({auth, recipes, apiRecipes, message,error }) {
         <AuthenticatedLayout user={auth.user}>
             <Head title="Recipes"/>
             <div className="py-12">
-                <div className="max-w-8xl mx-auto sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     {message && (
                         <div className="alert alert-info">
                             {message}
                         </div>
                     )}
 
-                    <NavLink href={route('recipes.create')} active={route().current('recipes.create')}>
-                        Create Recipes
-                    </NavLink>
+
                 </div>
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <Search/>
-                <ApiRecipes apiRecipes={apiRecipes} error={error}/>
-                <UserRecipes recipes={recipes} auth={auth} />
+                    <Search/>
+                    <ApiRecipes apiRecipes={apiRecipes} error={error}/>
+
+                    <UserRecipes recipes={recipes} auth={auth} />
                 </div>
 
             </div>

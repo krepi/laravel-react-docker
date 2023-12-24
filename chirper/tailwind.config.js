@@ -15,6 +15,10 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            backgroundImage: {
+                'color-1': '#2C2C2CFF',
+                // Możesz dodać więcej niestandardowych gradientów tutaj
+            },
         },
     },
 
