@@ -122,16 +122,7 @@ export default function WelcomeContent({ isLoggedIn }) {
                         </div>
                     </form>
                 </div>
-                {/* Footer Section */}
-                {/*<div className="bg-gray-900 text-white p-6">*/}
-                {/*    <div className="max-w-7xl mx-auto flex justify-between items-center">*/}
-                {/*        <p>&copy; DishDock {new Date().getFullYear()}</p>*/}
-                {/*        <div>*/}
-                {/*            /!* Social Media Icons *!/*/}
-                {/*            /!* ... (dodaj ikony/linki do mediów społecznościowych) ... *!/*/}
-                {/*        </div>*/}
-                {/*    </div>*/}
-                {/*</div>*/}
+
 
             </div>
 

@@ -122,40 +122,7 @@ const RecipeApiDetails = ({recipe, auth, errors}) => {
             </div>
         </AuthenticatedLayout>
 
-        // <AuthenticatedLayout user={auth.user}>
-        //     <Head title="Recipe"/>
-        //         {/*<DetailWrapper className='max-w-7xl mx-auto sm:px-6 lg:px-8'>*/}
-        //
-        //             <div>
-        //                 <InertiaLink className='text-white m-4 bg-blue-600 py-2 px-6 rounded' as='button' href="/recipes">Back</InertiaLink>
-        //                 {message && (
-        //                     <div className="alert alert-info text-red-600">
-        //                         {message}
-        //                     </div>
-        //                 )}
-        //                 <button onClick={handleSaveRecipe} className='text-white m-4 bg-green-500 py-2 px-6 rounded'>
-        //                   Zapisz jako moj przepis
-        //                 </button>
-        //             </div>
-        //             <div>
-        //                 <h2>{recipe.title}</h2>
-        //                 <img src={recipe.image} alt={recipe.title}/>
-        //                 <p>porcji: {recipe.servings}</p>
-        //                 <p>gotowe w: {recipe.readyInMinutes} minut</p>
-        //             </div>
-        //             <div>
-        //                 <p dangerouslySetInnerHTML={{__html: cleanInstructions}}/>
-        //                 <ul>
-        //                     <ul>
-        //                         {recipe.extendedIngredients.map((ingredient, index) => (
-        //                             <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient} source={'spoon'} />
-        //                         ))}
-        //                     </ul>
-        //                 </ul>
-        //             </div>
-        //         {/*</DetailWrapper>)*/}
-        // {/*}*/}
-        // </AuthenticatedLayout>
+
     );
 };
 
