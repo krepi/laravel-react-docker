@@ -37,16 +37,7 @@ class RecipeController extends Controller
      */
 
 
-//    public function index(): Response
-//    {
-//        return Inertia::render('Recipe/Index', [
-//            'recipes' => $this->recipeService->getAllRecipes(),
-//            'apiRecipes' => $this->recipeService->cacheApiRecipes('apiRecipes'),
-//            'message' => session('message')
-//
-//        ]);
-//
-//    }
+
     public function index(): Response
     {
         $apiRecipesResponse = $this->recipeService->cacheApiRecipes('apiRecipes');
@@ -65,12 +56,7 @@ class RecipeController extends Controller
             'apiRecipes' => $apiRecipesResponse,
             'message' => session('message')
         ]);
-//
-//        return Inertia::render('Dashboard', [
-//            'recipes' => $this->recipeService->getAllRecipes(),
-//            'apiRecipes' => $apiRecipesResponse,
-//            'message' => session('message')
-//        ]);
+
     }
 
 
@@ -88,30 +74,18 @@ class RecipeController extends Controller
      */
 
 
-//    public function store(Request $request): RedirectResponse
-//    {
-//
-//        $result = $this->recipeService->storeRecipe($request);
-//
-//
-//        if ($result['status'] === 'validation_error') {
-//
-//            return redirect()->back()->with('message', 'Ten przepis już istnieje w Twojej kolekcji.');
-//        }
-//        return redirect()->route('recipes.show', ['recipe' => $result['recipe']->id])
-//            ->with('message', 'Przepis został pomyślnie zapisany.');
-//    }
+
 
     public function store(Request $request): RedirectResponse
     {
         $result = $this->recipeService->storeRecipe($request);
 
         if ($result['status'] === 'validation_error') {
-            // Przekieruj użytkownika z powrotem z komunikatami błędów
+
             return redirect()->back()->withErrors($result['errors'])->withInput();
         }
 
-        // Przekieruj, jeśli sukces
+
         return redirect()->route('recipes.show', ['recipe' => $result['recipe']->id])
             ->with('message', 'Przepis został pomyślnie zapisany.');
     }
@@ -175,7 +149,7 @@ class RecipeController extends Controller
             $this->recipeService->deleteRecipe($recipe);
             return redirect()->route('recipes.index')->with('success', 'Przepis został usunięty.');
         } catch (\Exception $e) {
-            // Logowanie błędu lub inna obsługa wyjątku
+
             return redirect()->back()->with('error', 'Wystąpił błąd podczas usuwania przepisu.');
         }
     }
@@ -189,7 +163,6 @@ class RecipeController extends Controller
     public function handleSearch(Request $request): RedirectResponse
     {
 
-//        $termFromSearch = strtolower($request->input('term'));
         $termFromSearch = urldecode($request->input('term'));
 
         $cacheKey = 'search_results_' . $termFromSearch;
@@ -214,14 +187,14 @@ class RecipeController extends Controller
         $recipeId = $request->input('recipeId');
         $response = $this->recipeService->storeUserRecipeServiceMethod($recipeId, Auth::id());
 
-        // Sprawdzenie, czy odpowiedź jest instancją JsonResponse (co oznacza błąd)
+
         if ($response instanceof \Illuminate\Http\JsonResponse) {
-            // Przekierowanie z powrotem na stronę oryginalnego przepisu z komunikatem błędu
+
             return redirect()->route('recipes.show', $recipeId)
                 ->with('error', $response->getData()->message);
         }
 
-        // W przypadku sukcesu przekieruj na stronę nowego przepisu
+
         return redirect()->route('recipes.show', $response->id)
             ->with('success', 'Przepis został pomyślnie zapisany');
     }
@@ -229,59 +202,4 @@ class RecipeController extends Controller
 
 }
 
-//    public function storeUserRecipe(Request $request)
-//    {
-//        $recipeId = $request->input('recipeId');
-//        // Znajdź oryginalny przepis lub zwróć błąd 404, jeśli nie istnieje
-//        $originalRecipe = Recipe::findOrFail($recipeId);
-//
-//        // Utwórz nową instancję przepisu i skopiuj dane
-//        $userRecipe = $originalRecipe->replicate();
-//
-//        // Przypisz bieżącego użytkownika jako właściciela nowej kopii
-//        $userRecipe->user_id = Auth::id();
-//
-//        // Zapisz nową kopię przepisu w bazie danych
-//        $userRecipe->save();
-//
-//        // Zwróć odpowiedź, na przykład przekierowanie do nowo utworzonego przepisu
-//        return redirect()->route('recipes.show', $userRecipe->id);
-//    }
-//    public function storeUserRecipe(Request $request): RedirectResponse
-//    {
-//        $recipeId = $request->input('recipeId');
-//        $userRecipe = $this->recipeService->storeUserRecipe($recipeId, Auth::id());
-//
-//        return redirect()->route('recipes.show', $userRecipe->id);
-//    }
 
-
-//    public function storeUserRecipe(Request $request): RedirectResponse
-//    {
-//        $recipeId = $request->input('recipeId');
-//        $response = $this->recipeService->storeUserRecipe($recipeId, Auth::id());
-//
-////        if (isset($response['status']) && $response['status'] === 'error') {
-//        $data= $response->getData();
-//        if (isset($data->status) && $data->status === 'error') {
-//            // Przekierowanie z powrotem na stronę oryginalnego przepisu z komunikatem błędu
-//            return redirect()->route('recipes.show', $recipeId)
-//                ->with('error', $response['message']);
-//        }
-//
-//        // W przypadku sukcesu przekieruj na stronę nowego przepisu
-//        return redirect()->route('recipes.show', $response['recipe']->id);
-//    }
-
-//    public function showUserRecipes($userId) {
-//        $currentUser = auth()->user();
-//
-//        // Sprawdź, czy zalogowany użytkownik jest administratorem lub właścicielem przepisów
-//        if ($currentUser->id == $userId || $currentUser->isAdmin()) {
-//            $recipes = $this->recipeService->getUserRecipes($userId);
-//            return Inertia::render('UserRecipes', ['recipes' => $recipes]);
-//        } else {
-//            // Odpowiednia obsługa braku dostępu
-//            abort(403, 'Brak dostępu');
-//        }
-//    }

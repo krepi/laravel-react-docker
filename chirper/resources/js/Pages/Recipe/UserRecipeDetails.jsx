@@ -89,52 +89,6 @@ const RecipeApiDetails = ({recipe, auth}) => {
         </AuthenticatedLayout>
 
 
-        // <AuthenticatedLayout user={auth.user}>
-        //     <Head title="Recipe"/>
-        //     {flash?.success && <div className="alert alert-success">{flash.success}</div>}
-        //     {flash?.error && <div className="alert alert-danger">{flash.error}</div>}
-        //
-        //     {/*<DetailWrapper className='max-w-7xl mx-auto sm:px-6 lg:px-8'>*/}
-        //         <div>
-        //
-        //             <InertiaLink className='text-white m-4 bg-blue-600 py-2 px-6 rounded' as='button'
-        //                          href="/recipes">Back</InertiaLink>
-        //         </div>
-        //         {(recipe.user_id === auth.user.id || auth.user.role_id === 4) ?
-        //             <div>
-        //                 <Link className=' text-white m-4 bg-red-600 py-2 px-6 rounded'
-        //                       as='button'
-        //                       href={route('recipes.destroy', recipe.id)}
-        //                       method="delete">Delete</Link>
-        //
-        //                 <Link className=' text-white m-4 bg-blue-300 py-2 px-6 rounded'
-        //                       as='button'
-        //                       href={route('recipes.edit', recipe.id)}
-        //
-        //                 >Update</Link>
-        //             </div>
-        //             : <div>
-        //                 <button className=' text-white m-4 bg-green-300 py-2 px-6 rounded' onClick={saveRecipeAsUser}>Zapisz jako mój przepis</button>
-        //             </div>
-        //         }
-        //         <div>
-        //             <h2>{recipe.title}</h2>
-        //             <img src={recipe.image} alt={recipe.title}/>
-        //             <p>porcji: {recipe.servings}</p>
-        //             <p>gotowe w: {recipe.ready_in_minutes} minut</p>
-        //         </div>
-        //         <div>
-        //             <p dangerouslySetInnerHTML={{__html: cleanInstructions}}/>
-        //             <ul>
-        //                 {ingredients.map((ingredient, index) => (
-        //                     // <li key={ingredient.name + '_' + index}>{ingredient.name} {ingredient.quantity} {ingredient.unit}</li>
-        //                     <IngredientListItem key={ingredient.id + '_' + index} ingredient={ingredient}
-        //                                         source={'user'}/>
-        //                 ))}
-        //             </ul>
-        //         </div>
-        //     {/*</DetailWrapper>)*/}
-        // </AuthenticatedLayout>
     );
 };
 

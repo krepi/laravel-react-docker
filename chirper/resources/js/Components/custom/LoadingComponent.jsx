@@ -27,19 +27,7 @@ const LoadingContainer = styled.div`
   z-index: 9999;
 `;
 
-// Stylowany tekst
-// const LoadingText = styled.p`
-//   animation: ${changeSizeAndColor} 2s ease-in-out infinite;
-//   font-size: 40px; // Domyślny rozmiar dla dużych ekranów
-//
-//   @media (max-width: 768px) {
-//     font-size: 28px; // Mniejszy rozmiar dla tabletów
-//   }
-//
-//   @media (max-width: 480px) {
-//     font-size: 24px; // Jeszcze mniejszy rozmiar dla telefonów
-//   }
-// `;
+
 // Stylowany tekst
 const LoadingText = styled.p`
   animation: ${changeSizeAndColor} 2s ease-in-out infinite;
@@ -63,7 +51,7 @@ const LoadingText = styled.p`
 
 const LoadingComponent = () => (
     <LoadingContainer>
-        <LoadingText>Przygotowujemy Twoje Zamówienie ;D</LoadingText>
+        <LoadingText>Przygotowujemy Twoje Zamówienie </LoadingText>
     </LoadingContainer>
 );
 

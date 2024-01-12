@@ -33,10 +33,7 @@ class RecipeApiService extends RecipeService
 
     public function fetchRecipe($id)
     {
-//        $response = Http::get("https://api.spoonacular.com/recipes/{$id}/information?includeNutrition=true", [
-////            'includeNutrition'=>true,
-//            'apiKey' => $this->apiKey,
-//        ]);
+
         $url = "https://api.spoonacular.com/recipes/{$id}/information?includeNutrition=true&apiKey=". $this->apiKey;
         $response= Http::get($url);
         if ($response->successful()) {
@@ -50,12 +47,7 @@ class RecipeApiService extends RecipeService
     public function searchRecipes(string $query): array
     {
 
-//        $response = Http::get("https://api.spoonacular.com/recipes/complexSearch", [
-//            'apiKey' => $this->apiKey,
-//            'query' => $query,
-//            'number' => 6
-//
-//        ]);
+
         $url = "https://api.spoonacular.com/recipes/complexSearch?" . $query . "&number=12&addRecipeInformation=true&addRecipeNutrition=true&apiKey=" . $this->apiKey;
 
         // Wykonanie zapytania HTTP GET
