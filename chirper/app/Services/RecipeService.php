@@ -15,7 +15,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
-class RecipeService extends RecipeController
+class RecipeService
 {
 
     private $recipeRepository;

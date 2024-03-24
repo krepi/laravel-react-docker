@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Inertia\Response;
 
-class TranslationService extends RecipeService
+class TranslationService
 {
     private $apiKey;
     private $endpoint;

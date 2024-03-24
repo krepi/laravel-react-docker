@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Services\RecipeService;
 use Illuminate\Support\Facades\Http;
 
-class RecipeApiService extends RecipeService
+class RecipeApiService
 {
     private $apiKey;
 
