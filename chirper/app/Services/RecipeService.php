@@ -278,8 +278,7 @@ class RecipeService
                 $originalQuery = $queryParts['original'];
                 $translatedQuery = $queryParts['translated'];
 
-                if (!empty($originalQuery) && !empty($translatedQuery)) {
-                    $term = str_replace('query=' . $originalQuery, 'query=' . $translatedQuery, $term);
+                if (!empty($originalQuery) && !empty($translatedQuery)) {$term = str_replace('query=' . $originalQuery, 'query=' . $translatedQuery, $term);
                 }
 
                 $searchResults = $this->recipeApiService->searchRecipes($term);

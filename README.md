@@ -46,7 +46,8 @@ To run the project locally, follow these steps:
 6. In a separate terminal, start the frontend environment.
    ```
    npm install && npm run dev
-   ```
+   ``` 
+
 
 ### With Docker (Laravel Sail)
 
